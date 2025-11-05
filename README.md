@@ -79,7 +79,7 @@ Contains all interactive logic, data processing, and the Genetic Algorithm solve
    Routes are plotted on Google Maps, and textual route + distance info is displayed.
 
 7. **Console Logging**
-   Open console to see console logs such as the distance matrix, ietrations taken, whether any point is unreachable etc.
+   Open console to see console logs such as the distance matrix, iterations taken, whether any point is unreachable etc.
 
 ---
 
@@ -154,7 +154,7 @@ There are several ways to run `index.html`, depending on whether you want to jus
 
 ---
 
-### 💻 Option 2: Run with a Local Web Server (Recommended)
+### Option 2: Run with a Local Web Server (Recommended)
 
 Because Google Maps API calls are external network requests, browsers may enforce **CORS** restrictions when running from the local file system.
 To avoid this, serve the files via a lightweight HTTP server.
