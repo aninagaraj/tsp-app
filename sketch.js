@@ -95,7 +95,7 @@ function getAddress() {
 		const addr = textboxes[i].value();
 		addresses.push(addr);
 	}
-	
+
 	const all_invalid = (addresses.map(x => (/enter address \d+/i).test(x))).every(x => x);
 
 	if (all_invalid) {
@@ -179,7 +179,7 @@ function getAddress() {
 							// Adjust color and radius if city is unreachable
 
 							let color = (unreachable.some(val => val == i)) ? "#FF8C00" : "#FF0000";
-							let radius = (unreachable.some(val => val == i)) ? 500 : 100;
+							let radius = (unreachable.some(val => val == i)) ? 15000 : 3000;
 
 							// Add the circle for this city to the map.
 							const cityCircle = new google.maps.Circle({
@@ -192,12 +192,33 @@ function getAddress() {
 								center: city.coords,
 								radius: radius,
 							});
+							
+							city.circle = cityCircle;       // store reference
+							city.baseRadius = radius;   // store base radius
+
 							let city_v = createVector(city.coords.lng, city.coords.lat);
 							centroid.add(city_v);
 						}
 						centroid.mult(1 / cities.length);
 						map.setCenter({ lat: centroid.y, lng: centroid.x });
 						map.setZoom(8);
+
+						// Function to safely scale circles based on zoom
+						function updateCircleRadius() {
+							const zoom = map.getZoom();
+							cities.forEach(city => {
+								if (city.circle) { // safety check
+									const scaledRadius = city.baseRadius / Math.pow(2, zoom - 8);
+									city.circle.setRadius(scaledRadius);
+								}
+							});
+						}
+
+						// Update radius whenever zoom changes
+						map.addListener("zoom_changed", updateCircleRadius);
+
+						// Initial scaling
+						updateCircleRadius();
 
 						if (unreachable.length == 0) {
 							solveTSP(cities, distMatrix);

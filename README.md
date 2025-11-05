@@ -78,6 +78,9 @@ Contains all interactive logic, data processing, and the Genetic Algorithm solve
 6. **Visualization**
    Routes are plotted on Google Maps, and textual route + distance info is displayed.
 
+7. **Console Logging**
+   Open console to see console logs such as the distance matrix, ietrations taken, whether any point is unreachable etc.
+
 ---
 
 ## Setup Instructions
