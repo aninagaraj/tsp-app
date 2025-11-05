@@ -300,10 +300,21 @@ http://localhost:5555
 |-----|--------------|-------------|
 | 1 | Basic route between 4 locations | ![Basic Route](./screenshots/run1-basic.png) |
 | 2 | 8-address optimization | ![8 Address Route](./screenshots/run2-eight.png) |
-| 3 | GA demo - finding the optimal route for 75 randomly scattered points  | ![75 Random Points](./screenshots/ga-demo.gif)
 
+## Short blurb on GA
 
-   #### Let me know if you'd like the source code for the GA custom demo and I'm happy to share it. The left hand side shows the latest optimal route, the right hand side shows generations. The algorithm ends when the distance is unchanged for 2500 generations. I created a custom uncrossing patch that fixes local sub-optimalities when paths cross each other and do not uncross.
+Even though the algorithm itself is not the focus of this project, I created a custom demo to show how GA evolves to find the optimal or near optimal route for 75 randomly scattered points. The conceptual algorithm is as follows:
+
+1. **Fitness Calculation:** Each tour in the population is evaluated based on its total distance, and a normalized fitness score is computed to favor shorter tours (`calcFitness`).  
+2. **Selection:** Two parent tours are probabilistically chosen from the population according to their fitness (`sample`).  
+3. **Crossover:** A segment from one parent is copied, and remaining cities are filled from the second parent to produce a new tour (`crossOver`).  
+4. **Mutation:** Tours undergo random swaps of cities with a small probability to maintain genetic diversity.  
+5. **Iteration:** The population is replaced by the new generation, and the best tour is updated until the stopping condition is met - no improvements in 2500 generations.
+
+I created a custom uncrossing patch that fixes local sub-optimalities when paths cross each other and do not uncross.
+
+![75 Random Points](./screenshots/ga-demo.gif)
+
 ---
 
 ## Acknowledgements
