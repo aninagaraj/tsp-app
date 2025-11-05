@@ -300,7 +300,10 @@ http://localhost:5555
 |-----|--------------|-------------|
 | 1 | Basic route between 4 locations | ![Basic Route](./screenshots/run1-basic.png) |
 | 2 | 8-address optimization | ![8 Address Route](./screenshots/run2-eight.png) |
+| 3 | GA demo - finding the optimal route for 75 randomly scattered points  | ![75 Random Points](./screenshots/ga-demo.gif)
 
+
+   #### Let me know if you'd like the source code for the GA custom demo and I'm happy to share it. The left hand side shows the latest optimal route, the right hand side shows generations. The algorithm ends when the distance is unchanged for 2500 generations. I created a custom uncrossing patch that fixes local sub-optimalities when paths cross each other and do not uncross.
 ---
 
 ## Acknowledgements
@@ -308,4 +311,3 @@ http://localhost:5555
 * Inspired by [**Dan Shiffman’s “The Coding Train”**](https://thecodingtrain.com/) in general and specifically his explanation and visualizations of [**Genetic Algorithm**](https://www.youtube.com/watch?v=9zfeTw-uFCw).
 * Created while learning JS and algorithms — and while making something useful for myself.
 * I am a recreational coder which means the code is probably not optimized so feel free to use it as is or take it to the next level.
-
