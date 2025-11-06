@@ -327,6 +327,13 @@ This demo shows some limitations of GA. I scattered 150 points randomly on a 300
 
 ---
 
+### GA Demo 3 - Near optimality
+
+This demo shows another limitation of GA. I scattered 75 points randomly. The solution presented is clearly near-optimal because you can create a more optimal path by linking `14` with `29` and then linking `68` - `19` - `21`
+
+![near optimality](./screenshots/near_optimal.png)
+
+
 ## Acknowledgements
 
 * Inspired by [**Dan Shiffman’s “The Coding Train”**](https://thecodingtrain.com/) in general and specifically his explanation and visualizations of [**Genetic Algorithm**](https://www.youtube.com/watch?v=9zfeTw-uFCw).
