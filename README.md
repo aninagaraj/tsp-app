@@ -303,7 +303,7 @@ http://localhost:5555
 
 ## Short blurb on GA
 
-Even though the algorithm itself is not the focus of this project, I created a custom demo to show how GA evolves to find the optimal or near optimal route for 75 randomly scattered points. The conceptual algorithm is as follows:
+Even though the algorithm itself is not the focus of this project, I created a couple of custom demos to show how GA evolves to find the optimal or near optimal route. The conceptual algorithm is as follows:
 
 1. **Fitness Calculation:** Each tour in the population is evaluated based on its total distance, and a normalized fitness score is computed to favor shorter tours (`calcFitness`).  
 2. **Selection:** Two parent tours are probabilistically chosen from the population according to their fitness (`sample`).  
@@ -313,9 +313,13 @@ Even though the algorithm itself is not the focus of this project, I created a c
 
 I created a custom uncrossing patch that fixes local sub-optimalities when paths cross each other and do not uncross.
 
+### GA Demo 1 - Finding a path through 75 randomly scattered points
+
 ![75 Random Points](./screenshots/ga-demo.gif)
 
-Here's a demo showing limitations of GA. I scattered 150 points randomly on a 300 px radius circle. The shortest distance will be π * 600 = ~1884.954. The GA got to the optimal solution after ~17 minutes and made very slow improvements in between. In the demo video below, the first 100 seconds are at normal speed, the next ~850 seconds are at 10X and the remainder are at normal speed again for a total length of only 4:02 mins. Note that the algorithm stops when it can't improve for 2500 generations at 1884.81 which is near optimality.
+### GA Demo 2 - Finding a path through 150 randomly scattered points *on a circle*
+
+This demo shows some limitations of GA. I scattered 150 points randomly on a 300 px radius circle. The shortest distance will be π * 600 = ~1884.954. The GA got to the optimal solution after ~17 minutes and made very slow improvements in between. In the demo video below, the first 100 seconds are at normal speed, the next ~850 seconds are at 10X and the remainder are at normal speed again for a total length of only 4:02 mins. Note that the algorithm stops when it can't improve for 2500 generations at 1884.81 which is near optimality.
 
 ![150 random points on a circle](./screenshots/ga-circle-demo.gif)
 
