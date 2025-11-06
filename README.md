@@ -300,9 +300,8 @@ http://localhost:5555
 |-----|--------------|-------------|
 | 1 | Basic route between 4 locations | ![Basic Route](./screenshots/run1-basic.png) |
 | 2 | 8-address optimization | ![8 Address Route](./screenshots/run2-eight.png) |
-| 3 | Unreachable destination | ![Hawaii](./screenshots/unreachable.png) |
-
-### Note that there's an opportunity to display an appropriate message if a city is unreachable. Right now, it's only in the console and the map displays in the unreachable city with a darker color and a bigger radius
+| 3 | Unreachable destination | <div align="center"><img src="./screenshots/unreachable.png" ><br>Note that there's an opportunity to display an appropriate message if a city is unreachable. Right now, it's only in the console and the map displays in the unreachable city with a darker color and a bigger radius</div> |
+| 4 | Ferries | <div align="center"><img src="./screenshots/ferries.png" ><br>By default, ferries are allowed. You can change it in the google.maps.DistanceMatrixService call in `sketch.js`. Just add `avoidFerries: true`</div>  |
 
 ## Short blurb on GA
 
