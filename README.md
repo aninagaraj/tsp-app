@@ -300,7 +300,7 @@ http://localhost:5555
 |-----|--------------|-------------|
 | 1 | Basic route between 4 locations | ![Basic Route](./screenshots/run1-basic.png) |
 | 2 | 8-address optimization | ![8 Address Route](./screenshots/run2-eight.png) |
-| 3 | Unreachable destination | <div align="center"><img src="./screenshots/unreachable.png" ><br>Note that there's an opportunity to display an appropriate message if a city is unreachable. Right now, it's only in the console and the map displays in the unreachable city with a darker color and a bigger radius</div> |
+| 3 | Unreachable destination | <div align="center"><img src="./screenshots/unreachable.png" ><br>Note that there's an opportunity to display an appropriate message if a city is unreachable. Right now, it's only in the console and the map displays if the unreachable city with a different color and a bigger radius</div> |
 | 4 | Ferries | <div align="center"><img src="./screenshots/ferries.png" ><br>By default, ferries are allowed. You can change it in the google.maps.DistanceMatrixService call in `sketch.js`. Just add `avoidFerries: true`</div>  |
 
 ## Short blurb on GA
@@ -314,6 +314,8 @@ Even though the algorithm itself is not the focus of this project, I created a c
 5. **Iteration:** The population is replaced by the new generation, and the best tour is updated until the stopping condition is met - no improvements in 2500 generations.
 
 I created a custom uncrossing patch that fixes local sub-optimalities when paths cross each other and do not uncross.
+
+The LHS shows the most optimal "to-date" path and the RHS shows the continuous evolution.
 
 ### GA Demo 1 - Finding a path through 75 randomly scattered points
 
