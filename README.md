@@ -10,7 +10,7 @@ I found myself needing a small lightweight app that would determine the optimal 
 
 *Main interface showing address inputs, controls, and the map output.*
 
-![TSP Solver UI Overview](./screenshots/tsp-chicago-loop.jpg)
+![TSP Solver UI Overview](./screenshots/overview.jpg)
 
 ---
 
