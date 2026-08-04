@@ -353,11 +353,11 @@ function buildCityMarkers(coords, unreachableCoords = [], markStart = true) {
 	let k = 0;
 	for (const p of coords) {
 		if (!p) continue;
-		const cls = 'num-circle' + (markStart && k === 0 ? ' start' : '') + (isUnreachable(p) ? ' unreachable' : '');
+		const cls = 'num-circle' + (markStart && p.idx === 0 ? ' start' : '') + (isUnreachable(p) ? ' unreachable' : '');
 		markers.push(L.marker([p.lat, p.lng], {
 			icon: L.divIcon({
 				className: cls,
-				html: `<span>${k + 1}</span>`,
+				html: `<span>${(p.idx != null ? p.idx : k) + 1}</span>`,
 				iconSize: [24, 24],
 			}),
 		}));

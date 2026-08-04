@@ -98,6 +98,8 @@ app.post('/addresses', async (request, response) => {
         coords[i] = cities[i].coords;
         if (!cities[i].address) {
             cities.splice(i, 1);
+        } else {
+            cities[i].originalIndex = i;
         }
     }
 
@@ -144,7 +146,7 @@ app.post('/addresses', async (request, response) => {
         let result = await solveTSP(cities, solveMatrix, N, acc, mutationRate, socketID);
         let bestRoute = result.bestOrder;
         bestGen = result.bestGen;
-        orderedCities = bestRoute.map(i => ({ lat: cities[i].coords.lat, lng: cities[i].coords.lng }));
+        orderedCities = bestRoute.map(i => ({ lat: cities[i].coords.lat, lng: cities[i].coords.lng, idx: cities[i].originalIndex }));
         console.log(bestRoute);
 
         // Get path for round trip
