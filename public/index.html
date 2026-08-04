@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>TSP Solver</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
+	<script src="sketch.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+		integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+		integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+	<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+		integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
+		crossorigin="anonymous"></script>
+
+	<style>
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			background: #e8eaed;
+			color: #202124;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		#map {
+			position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+		}
+
+		.panel {
+			position: fixed; top: 16px; right: 16px; z-index: 1100;
+			width: 380px; max-height: calc(100vh - 88px); overflow-y: auto;
+			background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+		}
+		.resize-handle {
+			position: absolute; bottom: 0; left: 0; z-index: 5;
+			width: 18px; height: 18px; cursor: sw-resize;
+			user-select: none; touch-action: none;
+		}
+		.resize-handle::after {
+			content: ""; position: absolute; left: 4px; bottom: 4px;
+			width: 8px; height: 8px;
+			border-left: 2px solid #9aa0a6;
+			border-bottom: 2px solid #9aa0a6;
+		}
+		.panel section { padding: 16px; border-bottom: 1px solid #f1f3f4; }
+		.panel section:last-child { border-bottom: none; }
+		.panel h2 { font-size: 13px; font-weight: 500; color: #5f6368; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+		.seg { display: flex; gap: 8px; margin-bottom: 14px; }
+		.seg button {
+			flex: 1; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+			background: #fff; color: #3c4043; font-size: 13px; font-weight: 500;
+			font-family: inherit; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+		}
+		.seg button:hover { background: #f8f9fa; }
+		.seg button.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+		#unitsSeg { padding: 12px 0; margin-top: 12px; }
+
+		.upload-pane { position: relative; }
+		.upload-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+		.upload-label { font-size: 13px; font-weight: 500; color: #3c4043; }
+		.info-icon {
+			display: inline-flex; align-items: center; justify-content: center;
+			width: 16px; height: 16px; border-radius: 50%;
+			border: 1.5px solid #5f6368; color: #5f6368;
+			font-size: 10px; font-weight: 700; line-height: 1;
+			cursor: pointer; user-select: none;
+		}
+		.info-icon:hover { border-color: #1a73e8; color: #1a73e8; }
+		.popover {
+			display: none;
+			position: absolute; top: 26px; left: 0; z-index: 1300;
+			width: 100%; background: #fff; border: 1px solid #dadce0;
+			border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+			padding: 12px 14px; font-size: 13px; color: #3c4043;
+		}
+		.popover.open { display: block; }
+		.popover .title { font-weight: 500; margin-bottom: 6px; }
+		.popover ul { margin: 0; padding-left: 18px; }
+		.popover li { margin: 3px 0; }
+		.dropzone {
+			border: 2px dashed #dadce0; border-radius: 10px;
+			padding: 24px 14px; text-align: center; cursor: pointer;
+			transition: border-color 0.15s, background 0.15s;
+		}
+		.dropzone .icon { font-size: 26px; line-height: 1; }
+		.dropzone .main { font-size: 13px; font-weight: 500; color: #3c4043; margin: 8px 0 2px; }
+		.dropzone .sub { font-size: 12px; color: #80868b; }
+		.dropzone .or { font-size: 12px; color: #80868b; margin: 12px 0 8px; }
+		.dropzone .choose {
+			display: inline-block; padding: 7px 14px; background: #fff;
+			border: 1px solid #dadce0; border-radius: 8px; color: #1a73e8;
+			font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+		}
+		.dropzone .choose:hover { background: #f8f9fa; }
+		.dropzone.dragover { border-color: #1a73e8; background: #e8f0fe; }
+		.dropzone.dragover .main { color: #1a73e8; }
+		.upload-note { font-size: 12px; color: #188038; margin-top: 8px; text-align: center; min-height: 16px; }
+		.upload-note.error { color: #c5221f; }
+
+		.addr-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+		.addr-row { display: flex; align-items: center; gap: 8px; }
+		.addr-row .num {
+			width: 20px; height: 20px; border-radius: 50%; background: #f1f3f4; color: #5f6368;
+			font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+		}
+		.addr-row input {
+			flex: 1; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+			font-size: 13px; font-family: inherit; min-width: 0;
+		}
+		.addr-row input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+		.addr-row input.InvalidAddress { border-color: #ea4335; }
+		.addr-row input.ValidAddress { border-color: #34a853; }
+
+		.param-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+		.param-grid label { display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px; }
+		.avoid-list { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+		.toggle-row {
+			display: flex; align-items: center; justify-content: space-between;
+			padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+			font-size: 13px; cursor: pointer;
+		}
+		.toggle-row .toggle-label { color: #3c4043; }
+		.toggle { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+		.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+		.toggle-track {
+			position: absolute; inset: 0; background: #dadce0; border-radius: 999px;
+			transition: background 0.2s; cursor: pointer;
+		}
+		.toggle-track::before {
+			content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px;
+			background: #fff; border-radius: 50%; transition: transform 0.2s;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+		}
+		.toggle input:checked + .toggle-track { background: #1a73e8; }
+		.toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+		.param-grid select {
+			width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+			font-size: 13px; background: #fff; cursor: pointer;
+		}
+		.param-grid select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+		.ferry-leg .dist { color: #ea4335; }
+		.ferry-badge { color: #ea4335; font-size: 11px; font-weight: 600; }
+		.ferry-note { color: #ea4335; font-size: 12px; margin-top: 10px; }
+		.toggle-caveat { margin: 0; padding: 0 10px; font-size: 11px; color: #80868b; line-height: 1.4; }
+		.ferry-icon { display: flex; align-items: center; justify-content: center; font-size: 14px; }
+		.num-circle { display: flex; align-items: center; justify-content: center; background: #fff; color: #202124; border: 2px solid #1a73e8; border-radius: 50%; font-size: 12px; font-weight: 700; font-family: inherit; }
+		.num-circle.start { border-color: #e8710a; color: #e8710a; box-shadow: 0 0 0 3px rgba(232,113,10,0.3); }
+		.num-circle.unreachable { border-color: #ea4335; color: #ea4335; background: #fce8e6; box-shadow: 0 0 0 3px rgba(234,67,53,0.3); }
+
+		.controls { display: flex; gap: 8px; margin-top: 14px; }
+		.btn { flex: 1; border: none; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+		.btn-primary { background: #1a73e8; color: #fff; }
+		.btn-primary:hover { background: #1765cc; }
+		.btn-primary:disabled { background: #a8c7f5; cursor: not-allowed; }
+		.btn-ghost { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
+		.btn-ghost:hover { background: #f8f9fa; }
+
+		.progress-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+		.progress-wrap { flex: 1; height: 8px; background: #f1f3f4; border-radius: 999px; overflow: hidden; }
+		.progress-bar { height: 100%; width: 0%; background: #1a73e8; border-radius: 999px; transition: width 0.15s linear; }
+		.progress-label { font-size: 12px; color: #5f6368; min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
+
+		.stat { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 13px; }
+		.stat:last-child { border-bottom: none; }
+		.stat .k { color: #5f6368; }
+		.stat .v { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+		.route-list { list-style: none; margin: 8px 0 0; padding: 0; }
+		.route-list li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
+		.route-list li:nth-child(odd) { background: #f8f9fa; }
+		.route-list .step { color: #80868b; }
+		.route-list .dist { color: #5f6368; font-variant-numeric: tabular-nums; }
+
+		.hidden { display: none; }
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+
+	<div class="panel">
+		<section id="addrSection">
+			<h2>Addresses</h2>
+			<div class="seg">
+				<button id="segManual" class="active" onclick="setAddrMode('manual')">Type manually</button>
+				<button id="segUpload" onclick="setAddrMode('upload')">Upload file</button>
+			</div>
+			<div id="manualPane">
+				<div class="addr-grid" id="addrGrid"></div>
+			</div>
+			<div id="uploadPane" class="hidden">
+				<div class="upload-pane">
+					<div class="upload-head">
+						<span class="upload-label">Upload address list</span>
+						<span class="info-icon" id="infoIcon">i</span>
+						<div class="popover" id="infoPop">
+							<div class="title">File format:</div>
+							<ul>
+								<li>Up to 8 addresses</li>
+								<li>One address per line</li>
+								<li>No headers</li>
+							</ul>
+						</div>
+					</div>
+					<div class="dropzone" id="dropzone">
+						<div class="icon">📄</div>
+						<div class="main">Drag &amp; drop a text file here</div>
+						<div class="sub">.txt or .csv · one address per line</div>
+						<div class="or">or</div>
+						<button class="choose" id="chooseBtn">Choose a file</button>
+						<input type="file" id="fileInput" accept="text/*,.csv" style="display:none" />
+					</div>
+					<div class="upload-note" id="uploadNote"></div>
+				</div>
+			</div>
+		</section>
+
+		<section id="algoSection">
+			<h2>Algorithm</h2>
+			<div class="param-grid">
+				<div>
+					<label for="population">Population size</label>
+					<select id="population"></select>
+				</div>
+				<div>
+					<label for="acc">Accuracy (generations)</label>
+					<select id="acc"></select>
+				</div>
+				<div>
+					<label for="mr">Mutation rate</label>
+					<select id="mr"></select>
+				</div>
+			</div>
+			<div class="seg" id="unitsSeg">
+				<button id="unitMi" class="active" onclick="setUnits('mi')">Miles</button>
+				<button id="unitKm" onclick="setUnits('km')">Kilometers</button>
+			</div>
+			<div class="seg" id="objSeg">
+				<button id="objDistance" class="active" onclick="setObjective('distance')">By distance</button>
+				<button id="objDuration" onclick="setObjective('duration')">By time</button>
+			</div>
+			<p class="toggle-caveat">"By time" optimizes the round trip for shortest driving time.</p>
+			<div class="avoid-list">
+				<label class="toggle-row">
+					<span class="toggle-label">Avoid toll roads?</span>
+					<span class="toggle">
+						<input type="checkbox" id="avoid-tolls" />
+						<span class="toggle-track"></span>
+					</span>
+				</label>
+				<label class="toggle-row">
+					<span class="toggle-label">Avoid ferries?</span>
+					<span class="toggle">
+						<input type="checkbox" id="avoid-ferries" />
+						<span class="toggle-track"></span>
+					</span>
+				</label>
+				<p class="toggle-caveat">Note: Google treats "avoid" as a preference, not a hard ban — a ferry may still be used if it's the best or only connection.</p>
+			</div>
+			<div class="controls">
+				<button class="btn btn-primary" id="submit" onclick="getAddress()">Solve route</button>
+				<button class="btn btn-ghost" id="reset" onclick="resetAll()">Reset</button>
+			</div>
+			<div class="progress-row">
+				<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
+				<div class="progress-label" id="plabel">Idle</div>
+			</div>
+			<div class="progress-label" id="liveDist" hidden>Best so far: —</div>
+		</section>
+
+		<section id="resultsSection" class="hidden">
+			<h2>Results</h2>
+			<div class="stat"><div class="k" id="objLabel">Optimal distance</div><div class="v" id="dist">—</div></div>
+			<div class="stat"><div class="k">Last improved at</div><div class="v" id="genAt">—</div></div>
+			<ol class="route-list" id="segments"></ol>
+			<div class="ferry-note hidden" id="ferryNote"></div>
+			<div class="ferry-note hidden" id="unreachableNote"></div>
+		</section>
+
+		<div class="resize-handle" id="resizeHandle"></div>
+	</div>
+</body>
+
+</html>

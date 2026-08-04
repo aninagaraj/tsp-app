@@ -1,2 +1,5 @@
-.vscode
-.DS_Store
+node_modules
+.env
+@eaDir
+api_cache.json
+api_cache.log

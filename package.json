@@ -1,0 +1,20 @@
+{
+  "name": "tsp-app",
+  "version": "1.0.0",
+  "description": "TSP for up to 8 addresses — public mirror of the tsp_solver project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aniruddha Nagaraj",
+  "license": "MIT",
+  "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.3.16",
+    "axios": "^1.13.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.1",
+    "node-fetch": "^2.6.7",
+    "socket.io": "^4.8.3"
+  }
+}
