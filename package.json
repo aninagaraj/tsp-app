@@ -1,7 +1,7 @@
 {
   "name": "tsp-app",
   "version": "1.0.0",
-  "description": "TSP for up to 8 addresses — public mirror of the tsp_solver project",
+  "description": "TSP for up to 10 addresses — public mirror of the tsp_solver project",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -101,7 +101,7 @@ Then open `http://localhost:5555` (or set `PORT` to change it). The app also ser
 
 ## How to Use
 
-1. Enter up to 8 addresses (or upload a `.txt`/`.csv` file, one address per line).
+1. Enter up to 10 addresses (or upload a `.txt`/`.csv` file, one address per line).
 2. Choose the GA parameters: **Population**, **Accuracy (generations)**, **Mutation Rate**.
 3. Optionally switch **units** (miles/km), the **objective** (by distance or by time), and toggle **avoid tolls/ferries**.
 4. Click **Solve route**.
@@ -134,6 +134,8 @@ Even though the algorithm itself is not the focus of this project, the genetic a
 6. **Iteration:** The population is replaced, and the best tour is tracked until the generation budget is met.
 
 ## Demo Gallery
+
+> _Screenshots were captured with the earlier build that capped input at 8 addresses. The current version accepts up to 10._
 
 | Run | Description | Screenshot |
 |-----|--------------|-------------|

@@ -1,6 +1,6 @@
 // init global vars
 let textboxes = [];
-const n = 8;
+const n = 10;
 let addresses;
 let unreachable;
 let tsp;
@@ -81,7 +81,7 @@ function setup() {
 		if (infoPop && !infoPop.contains(e.target)) infoPop.classList.remove("open");
 	});
 
-	// File upload: one address per line, no headers, max 8
+	// File upload: one address per line, no headers, max 10
 	const dropzone = document.getElementById("dropzone");
 	const fileInput = document.getElementById("fileInput");
 	const uploadNote = document.getElementById("uploadNote");
