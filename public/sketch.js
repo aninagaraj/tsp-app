@@ -585,10 +585,13 @@ console.log(paths);
 		let polylines = [];
 		let ferryMarkers = [];
 		for (let i = 0; i < paths.length; i++) {
+			const col = paths[i].ferry ? '#FF6F00' : '#283593';
+			// glow layer — wide, faint, behind the main line
 			polylines.push(L.polyline(paths[i].coords, {
-				color: paths[i].ferry ? 'red' : 'blue',
-				opacity: 0.5,
-				weight: 2,
+				color: col, weight: 6, opacity: 0.12, className: 'route-glow',
+			}));
+			polylines.push(L.polyline(paths[i].coords, {
+				color: col, opacity: 0.6, weight: 2, dashArray: '8, 8',
 			}));
 			if (paths[i].ferry) {
 				const start = paths[i].ferryStart;
@@ -614,6 +617,9 @@ console.log(paths);
 	} else {
 		console.log("Enter at least 3 valid addresses");
 		document.getElementById("submit").disabled = false;
+		document.getElementById("population").disabled = false;
+		document.getElementById("acc").disabled = false;
+		document.getElementById("mr").disabled = false;
 		document.getElementById("plabel").textContent = "Need ≥3 valid";
 	}
 }
