@@ -468,9 +468,7 @@ async function getAddress() {
 			document.getElementById("acc").disabled = false;
 			document.getElementById("mr").disabled = false;
 			const animBtn = document.getElementById("animBtn");
-			const saveBtn = document.getElementById("saveResult");
 			if (animBtn) animBtn.setAttribute("hidden", "");
-			if (saveBtn) saveBtn.setAttribute("hidden", "");
 
 			clearInterim();
 			if (curr_layer) {
@@ -572,21 +570,12 @@ console.log(paths);
 		document.getElementById("acc").disabled = false;
 		document.getElementById("mr").disabled = false;
 
-		// Show animate + save buttons
+		// Show animate button
 		const animBtn = document.getElementById("animBtn");
-		const saveBtn = document.getElementById("saveResult");
 		if (animBtn) animBtn.removeAttribute("hidden");
-		if (saveBtn) saveBtn.removeAttribute("hidden");
 
-		// Store route data for animation and compare
+		// Store route data for animation
 		_lastPaths = paths;
-		_lastResult = {
-			label: `Run ${new Date().toLocaleString()}`,
-			dist: sumDist,
-			dur: sumDur,
-			genAt: data.bestGen ? `gen ${data.bestGen}` : "—",
-		};
-		renderCompareCard();
 
 		// Draw cities and TSP on the map
 		if (curr_layer) {
@@ -632,10 +621,8 @@ console.log(paths);
 
 // -- globals for animation + compare ------------------------------------
 let _lastPaths = null;
-let _lastResult = null;
 let _animMarker = null;
 let _animTimer = null;
-const SAVE_KEY = "tsp.savedRuns";
 
 function startRouteAnimation() {
 	if (!_lastPaths || _lastPaths.length === 0) return;
@@ -681,101 +668,15 @@ function stopRouteAnimation() {
 	if (btn) btn.textContent = "Animate route";
 }
 
-function loadSaves() {
-	try { return JSON.parse(localStorage.getItem(SAVE_KEY) || "[]"); }
-	catch (e) { return []; }
-}
-
-function persistSaves(saves) {
-	localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
-}
-
-function saveCompareRun() {
-	if (!_lastResult) return;
-	const saves = loadSaves();
-	saves.unshift({
-		id: Date.now().toString(36),
-		label: _lastResult.label,
-		dist: _lastResult.dist,
-		dur: _lastResult.dur,
-		genAt: _lastResult.genAt,
-	});
-	persistSaves(saves);
-	renderCompareCard();
-}
-
-function deleteCompareRun(id) {
-	let saves = loadSaves();
-	saves = saves.filter(r => r.id !== id);
-	persistSaves(saves);
-	renderCompareCard();
-}
-
-function pctDelta(cur, base) {
-	if (!isFinite(base) || base === 0) return null;
-	return ((cur - base) / base) * 100;
-}
-
-function renderCompareCard() {
-	const el = document.getElementById("compareCard");
-	const saves = loadSaves();
-	if (!el) return;
-
-	if (!saves.length) {
-		el.innerHTML = "";
-		el.setAttribute("hidden", "");
-		return;
-	}
-	el.removeAttribute("hidden");
-
-	let rows = saves.map(r => {
-		const distText = formatDist(r.dist, currentUnit);
-		return `<div class="compare-run">
-			<span><strong>${r.label}</strong></span>
-			<span class="meta">${distText} · ${r.genAt}</span>
-			<span style="margin-left:auto">
-				<button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="deleteCompareRun('${r.id}')">Delete</button>
-			</span>
-		</div>`;
-	}).join("");
-
-	let table = "";
-	if (_lastResult && saves.length > 0) {
-		const base = saves[0];
-		const cur = _lastResult;
-		const delta = pctDelta(cur.dist, base.dist);
-		let cls = "delta-tie", label = "Tie";
-		if (delta !== null) {
-			const d = Math.abs(delta);
-			if (d > 0.005) {
-				cls = delta < 0 ? "delta-better" : "delta-worse";
-				label = (delta < 0 ? "" : "+") + delta.toFixed(2) + "%";
-			}
-		}
-		table = `<table class="compare-table"><thead><tr>
-			<th>Run</th><th>Distance</th><th>Δ vs baseline</th><th>Gen</th>
-		</tr></thead><tbody>
-			<tr><td>${base.label} (baseline)</td><td>${formatDist(base.dist, currentUnit)}</td><td>—</td><td>${base.genAt}</td></tr>
-			<tr><td>${cur.label}</td><td>${formatDist(cur.dist, currentUnit)}</td><td><span class="${cls}">${label}</span></td><td>${cur.genAt}</td></tr>
-		</tbody></table>`;
-	}
-
-	el.innerHTML = rows + table;
-}
 
 (function () {
 	const origReset = window.resetAll;
 	window.resetAll = function () {
 		stopRouteAnimation();
 		_lastPaths = null;
-		_lastResult = null;
 		const animBtn = document.getElementById("animBtn");
-		const saveBtn = document.getElementById("saveResult");
 		if (animBtn) animBtn.setAttribute("hidden", "");
-		if (saveBtn) saveBtn.setAttribute("hidden", "");
 		document.getElementById("liveDist").setAttribute("hidden", "");
-		const compareCard = document.getElementById("compareCard");
-		if (compareCard) compareCard.setAttribute("hidden", "");
 		if (origReset) origReset();
 	};
 })();

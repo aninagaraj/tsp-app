@@ -176,20 +176,6 @@
 		.route-list .dist { color: #5f6368; font-variant-numeric: tabular-nums; }
 
 		.hidden { display: none; }
-
-		.compare-run {
-			display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
-			padding: 8px 10px; background: #f8f9fa; border-radius: 8px;
-			font-size: 12px; margin-bottom: 6px;
-		}
-		.compare-run .meta { color: #80868b; }
-		.compare-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-		.compare-table th, .compare-table td { text-align: right; padding: 4px 8px; border-bottom: 1px solid #f1f3f4; }
-		.compare-table th:first-child, .compare-table td:first-child { text-align: left; }
-		.compare-table th { color: #5f6368; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
-		.delta-better { color: #188038; font-weight: 600; }
-		.delta-worse  { color: #c5221f; font-weight: 600; }
-		.delta-tie    { color: #80868b; font-weight: 600; }
 	</style>
 </head>
 
@@ -295,9 +281,7 @@
 			<div class="ferry-note hidden" id="unreachableNote"></div>
 			<div class="controls">
 				<button class="btn btn-ghost" id="animBtn" onclick="startRouteAnimation()" hidden>Animate route</button>
-				<button class="btn btn-ghost" id="saveResult" onclick="saveCompareRun()" hidden>Save run</button>
 			</div>
-			<div id="compareCard" style="margin-top:12px" hidden></div>
 		</section>
 
 		<div class="resize-handle" id="resizeHandle"></div>
