@@ -32,13 +32,28 @@ function setup() {
 		const label = document.getElementById("plabel");
 		if (bar && label) {
 			bar.style.width = (data.progress * 100).toFixed(1) + "%";
-			label.textContent = Math.round(data.progress * 100) + "%";
+			const div = Math.max(1, data.diversity || 0);
+			label.textContent = Math.round(data.progress * 100) + "% · div " + div;
+		}
+		const live = document.getElementById("liveDist");
+		if (live && data.diversity !== undefined) {
+			const stag = data.stagnation || 0;
+			live.textContent = `Stagnation: ${stag}  ·  Diversity: ${data.diversity}/${data.popSize}`;
+			live.removeAttribute("hidden");
 		}
 	});
 
 	// Listen for interim best-route updates while solving
 	socket.on('route-update', (data) => {
 		drawInterim(data.coords, data.recordDist);
+		const live = document.getElementById("liveDist");
+		if (live) {
+			const distText = currentMetric === "duration"
+				? formatDuration(data.recordDist)
+				: formatDist(data.recordDist, currentUnit);
+			live.textContent = `Best so far: ${distText}`;
+			live.removeAttribute("hidden");
+		}
 	});
 
 	// Build address rows into the grid
@@ -401,7 +416,11 @@ async function getAddress() {
 
 	if (all_invalid.reduce((acc, val) => acc + val) <= 5) {
 		// Post addresses and model params to API
-		document.getElementById("submit").disabled = true;
+		const submitBtn = document.getElementById("submit");
+		submitBtn.disabled = true;
+		document.getElementById("population").disabled = true;
+		document.getElementById("acc").disabled = true;
+		document.getElementById("mr").disabled = true;
 		document.getElementById("plabel").textContent = "Solving…";
 
 		// Get selected population
@@ -445,6 +464,13 @@ async function getAddress() {
 			document.getElementById("resultsSection").classList.remove("hidden");
 			document.getElementById("plabel").textContent = "Unreachable";
 			document.getElementById("submit").disabled = false;
+			document.getElementById("population").disabled = false;
+			document.getElementById("acc").disabled = false;
+			document.getElementById("mr").disabled = false;
+			const animBtn = document.getElementById("animBtn");
+			const saveBtn = document.getElementById("saveResult");
+			if (animBtn) animBtn.setAttribute("hidden", "");
+			if (saveBtn) saveBtn.setAttribute("hidden", "");
 
 			clearInterim();
 			if (curr_layer) {
@@ -542,6 +568,25 @@ console.log(paths);
 		}
 		document.getElementById("plabel").textContent = "Done";
 		document.getElementById("submit").disabled = false;
+		document.getElementById("population").disabled = false;
+		document.getElementById("acc").disabled = false;
+		document.getElementById("mr").disabled = false;
+
+		// Show animate + save buttons
+		const animBtn = document.getElementById("animBtn");
+		const saveBtn = document.getElementById("saveResult");
+		if (animBtn) animBtn.removeAttribute("hidden");
+		if (saveBtn) saveBtn.removeAttribute("hidden");
+
+		// Store route data for animation and compare
+		_lastPaths = paths;
+		_lastResult = {
+			label: `Run ${new Date().toLocaleString()}`,
+			dist: sumDist,
+			dur: sumDur,
+			genAt: data.bestGen ? `gen ${data.bestGen}` : "—",
+		};
+		renderCompareCard();
 
 		// Draw cities and TSP on the map
 		if (curr_layer) {
@@ -583,6 +628,157 @@ console.log(paths);
 		document.getElementById("plabel").textContent = "Need ≥3 valid";
 	}
 }
+
+
+// -- globals for animation + compare ------------------------------------
+let _lastPaths = null;
+let _lastResult = null;
+let _animMarker = null;
+let _animTimer = null;
+const SAVE_KEY = "tsp.savedRuns";
+
+function startRouteAnimation() {
+	if (!_lastPaths || _lastPaths.length === 0) return;
+	if (_animTimer) { clearInterval(_animTimer); _animTimer = null; }
+
+	const allCoords = _lastPaths.flatMap(p => p.coords);
+	if (allCoords.length < 2) return;
+
+	const btn = document.getElementById("animBtn");
+	const origLabel = btn ? btn.textContent : "Animate route";
+	if (btn) btn.textContent = "Replay";
+
+	if (_animMarker) { _animMarker.removeFrom(tsp); _animMarker = null; }
+
+	let idx = 0;
+	const icon = L.divIcon({
+		className: "",
+		html: '<div style="width:16px;height:16px;border-radius:50%;background:#1a73e8;filter:drop-shadow(0 0 6px #1a73e8);"></div>',
+		iconSize: [16, 16],
+		iconAnchor: [8, 8],
+	});
+	_animMarker = L.marker(allCoords[0], { icon }).addTo(tsp);
+
+	const totalFrames = 1800;
+	const perFrame = Math.ceil(allCoords.length / totalFrames) || 1;
+
+	_animTimer = setInterval(() => {
+		idx += perFrame;
+		if (idx >= allCoords.length) {
+			idx = 0;
+			if (btn) btn.textContent = origLabel;
+			clearInterval(_animTimer);
+			_animTimer = null;
+		}
+		_animMarker.setLatLng(allCoords[idx]);
+	}, 1000 / 60);
+}
+
+function stopRouteAnimation() {
+	if (_animTimer) { clearInterval(_animTimer); _animTimer = null; }
+	if (_animMarker) { _animMarker.removeFrom(tsp); _animMarker = null; }
+	const btn = document.getElementById("animBtn");
+	if (btn) btn.textContent = "Animate route";
+}
+
+function loadSaves() {
+	try { return JSON.parse(localStorage.getItem(SAVE_KEY) || "[]"); }
+	catch (e) { return []; }
+}
+
+function persistSaves(saves) {
+	localStorage.setItem(SAVE_KEY, JSON.stringify(saves));
+}
+
+function saveCompareRun() {
+	if (!_lastResult) return;
+	const saves = loadSaves();
+	saves.unshift({
+		id: Date.now().toString(36),
+		label: _lastResult.label,
+		dist: _lastResult.dist,
+		dur: _lastResult.dur,
+		genAt: _lastResult.genAt,
+	});
+	persistSaves(saves);
+	renderCompareCard();
+}
+
+function deleteCompareRun(id) {
+	let saves = loadSaves();
+	saves = saves.filter(r => r.id !== id);
+	persistSaves(saves);
+	renderCompareCard();
+}
+
+function pctDelta(cur, base) {
+	if (!isFinite(base) || base === 0) return null;
+	return ((cur - base) / base) * 100;
+}
+
+function renderCompareCard() {
+	const el = document.getElementById("compareCard");
+	const saves = loadSaves();
+	if (!el) return;
+
+	if (!saves.length) {
+		el.innerHTML = "";
+		el.setAttribute("hidden", "");
+		return;
+	}
+	el.removeAttribute("hidden");
+
+	let rows = saves.map(r => {
+		const distText = formatDist(r.dist, currentUnit);
+		return `<div class="compare-run">
+			<span><strong>${r.label}</strong></span>
+			<span class="meta">${distText} · ${r.genAt}</span>
+			<span style="margin-left:auto">
+				<button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="deleteCompareRun('${r.id}')">Delete</button>
+			</span>
+		</div>`;
+	}).join("");
+
+	let table = "";
+	if (_lastResult && saves.length > 0) {
+		const base = saves[0];
+		const cur = _lastResult;
+		const delta = pctDelta(cur.dist, base.dist);
+		let cls = "delta-tie", label = "Tie";
+		if (delta !== null) {
+			const d = Math.abs(delta);
+			if (d > 0.005) {
+				cls = delta < 0 ? "delta-better" : "delta-worse";
+				label = (delta < 0 ? "" : "+") + delta.toFixed(2) + "%";
+			}
+		}
+		table = `<table class="compare-table"><thead><tr>
+			<th>Run</th><th>Distance</th><th>Δ vs baseline</th><th>Gen</th>
+		</tr></thead><tbody>
+			<tr><td>${base.label} (baseline)</td><td>${formatDist(base.dist, currentUnit)}</td><td>—</td><td>${base.genAt}</td></tr>
+			<tr><td>${cur.label}</td><td>${formatDist(cur.dist, currentUnit)}</td><td><span class="${cls}">${label}</span></td><td>${cur.genAt}</td></tr>
+		</tbody></table>`;
+	}
+
+	el.innerHTML = rows + table;
+}
+
+(function () {
+	const origReset = window.resetAll;
+	window.resetAll = function () {
+		stopRouteAnimation();
+		_lastPaths = null;
+		_lastResult = null;
+		const animBtn = document.getElementById("animBtn");
+		const saveBtn = document.getElementById("saveResult");
+		if (animBtn) animBtn.setAttribute("hidden", "");
+		if (saveBtn) saveBtn.setAttribute("hidden", "");
+		document.getElementById("liveDist").setAttribute("hidden", "");
+		const compareCard = document.getElementById("compareCard");
+		if (compareCard) compareCard.setAttribute("hidden", "");
+		if (origReset) origReset();
+	};
+})();
 
 
 const decode = function (encodedPath, precision = 5) {

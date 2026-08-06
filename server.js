@@ -126,7 +126,7 @@ app.post('/addresses', async (request, response) => {
     console.table(durationMatrix);
 
     // Check if any cities are unreachable
-    unreachable = [];
+    let unreachable = [];
     for (let i = 0; i < distMatrix.length; i++) {
         let temp = distMatrix[i].slice()
         temp.splice(i, 1);
@@ -323,13 +323,29 @@ async function solveTSP(cities, distMatrix, N, gen, mutationRate, socketID) {
             population[Math.floor(Math.random() * population.length)] = bestOrder.slice();
         }
 
+        // Champion re-injection: copy the polished best tour into a random
+        // non‑elite slot so improved edges feed back into OX crossover.
+        const champ = bestOrder.slice();
+        if (champ.length >= 4 && !population.some(t => t.length === champ.length && t.every((v, k) => v === champ[k]))) {
+            const hi = Math.max(1, population.length - 1);
+            population[1 + Math.floor(Math.random() * hi)] = champ;
+        }
+
         population = crossOver(mutationRate, population, cdf, bestOrder);
 
         // Yield every every so often before heavy CPU work
         if (generation % 10 === 0) {
             if (socketID && connectedSockets.get(socketID)) {
                 const progress = generation / gen;
-                connectedSockets.get(socketID).emit('generation-progress', { progress });
+                // Diversity: count unique tours in the population
+                const seen = new Set();
+                for (const tour of population) seen.add(tour.join(","));
+                connectedSockets.get(socketID).emit('generation-progress', {
+                    progress,
+                    stagnation,
+                    diversity: seen.size,
+                    popSize: population.length,
+                });
             }
             await new Promise(resolve => setImmediate(resolve));
         }
@@ -338,7 +354,7 @@ async function solveTSP(cities, distMatrix, N, gen, mutationRate, socketID) {
         generation++;
     }
     console.log(`Best route unchanged for ${stagnation} generations`);
-    return { bestOrder, bestGen };
+    return { bestOrder, bestGen, stagnation };
 }
 
 function calcDist(order, distMatrix) {
@@ -358,7 +374,7 @@ function twoOpt(tour, distMatrix) {
     const n = tour.length;
     let improved = true;
     let sweeps = 0;
-    while (improved && sweeps < 20) {
+    while (improved && sweeps < 100) {
         improved = false;
         sweeps++;
         for (let i = 0; i < n - 1; i++) {
