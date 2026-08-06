@@ -38,8 +38,9 @@ Express server (server.js)
 - **Selection** — two parents are picked by fitness-proportionate roulette via a **binary search over the CDF** (O(log P)).
 - **Crossover** — order crossover (OX): a contiguous block from parent A, remaining cities filled in order from parent B, tracked with a **presence array** (O(n)). A random swap mutation may then occur.
 - **Elitism** — the current best tour is guaranteed to survive into the next generation.
-- **Repair (2-opt)** — every generation, the best tour gets a bounded 2-opt sweep: any pair of edges whose reversal shortens the round trip (removing a crossing) is fixed immediately, keeping the route essentially crossing-free.
-- **Stop condition** — runs for the selected number of generations (`accuracy`).
+- **Repair (2-opt)** — every generation, the best tour gets a bounded 2-opt sweep (up to 100 passes): any pair of edges whose reversal shortens the round trip (removing a crossing) is fixed immediately, keeping the route essentially crossing-free.
+- **Champion re-injection** — after 2-opt, the polished best tour is copied into a random non‑elite slot (deduped) so improved edges feed back into OX crossover.
+- **Stop condition** — runs for the selected number of generations (`accuracy`). While solving, live diversity (unique tours) and stagnation (generations without improvement) are streamed alongside the progress bar.
 
 ## File Overview
 
@@ -105,8 +106,9 @@ Then open `http://localhost:5555` (or set `PORT` to change it). The app also ser
 2. Choose the GA parameters: **Population**, **Accuracy (generations)**, **Mutation Rate**.
 3. Optionally switch **units** (miles/km), the **objective** (by distance or by time), and toggle **avoid tolls/ferries**.
 4. Click **Solve route**.
-5. Watch the live progress: addresses validate in place, the progress bar fills, and an interim best-so-far tour is drawn as the GA runs.
-6. The final round trip is drawn on the map with numbered stops, and each segment's distance/duration is listed below.
+5. Watch the live progress: addresses validate in place, the progress bar fills (showing generation %, live diversity, and stagnation count), the best-so-far distance updates in real time, and an interim tour is drawn as the GA runs.
+6. The final round trip is drawn on the map with dashed, glow-haloed polylines (deep indigo for regular segments, amber for ferry legs — optimized for contrast against OpenStreetMap tiles), numbered stops, and each segment's distance/duration listed below.
+7. Click **Animate route** to send a glowing dot along the solved tour at 60 fps; the button becomes **Replay** when the tour finishes. The round trip is rotated to start from the first valid address you entered.
 
 > Any address that can't be reached by road is flagged as unreachable, and the solver will not run until it's removed.
 
@@ -130,8 +132,9 @@ Even though the algorithm itself is not the focus of this project, the genetic a
 2. **Selection:** Two parent tours are probabilistically chosen according to their fitness (binary search over the CDF).
 3. **Crossover:** A segment from one parent is copied, and the remaining cities are filled from the second parent in order.
 4. **Mutation:** Tours undergo random swaps with a small probability to maintain diversity.
-5. **2-opt repair:** The best tour is locally un-crossed every generation.
-6. **Iteration:** The population is replaced, and the best tour is tracked until the generation budget is met.
+5. **2-opt repair:** The best tour is locally un-crossed every generation with up to 100 sweeps.
+6. **Champion re-injection:** The 2-opt polished best tour is copied into a random non-elite slot (deduped) every generation, feeding improved edges back into OX crossover.
+7. **Iteration:** The population is replaced, and the best tour is tracked until the generation budget is met. Live diversity (unique tours) and stagnation (generations without improvement) are streamed to the browser alongside the progress bar.
 
 ## Demo Gallery
 
