@@ -644,13 +644,14 @@ function startRouteAnimation() {
 	if (_animMarker) { _animMarker.removeFrom(tsp); _animMarker = null; }
 
 	let idx = 0;
-	const icon = L.divIcon({
-		className: "",
-		html: '<div style="width:16px;height:16px;border-radius:50%;background:#1a73e8;filter:drop-shadow(0 0 6px #1a73e8);"></div>',
-		iconSize: [16, 16],
-		iconAnchor: [8, 8],
-	});
-	_animMarker = L.marker(allCoords[0], { icon }).addTo(tsp);
+	_animMarker = L.circleMarker(allCoords[0], {
+		radius: 7,
+		color: '#1a73e8',
+		fillColor: '#1a73e8',
+		fillOpacity: 0.9,
+		weight: 3,
+		opacity: 0.5,
+	}).addTo(tsp);
 
 	const totalFrames = 1800;
 	const perFrame = Math.ceil(allCoords.length / totalFrames) || 1;
