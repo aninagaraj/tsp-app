@@ -146,8 +146,17 @@ app.post('/addresses', async (request, response) => {
         let result = await solveTSP(cities, solveMatrix, N, acc, mutationRate, socketID);
         let bestRoute = result.bestOrder;
         bestGen = result.bestGen;
-        orderedCities = bestRoute.map(i => ({ lat: cities[i].coords.lat, lng: cities[i].coords.lng, idx: cities[i].originalIndex }));
+
+        // Rotate the tour so it begins at the first valid city (index 0 in
+        // the filtered cities array — the earliest-entered reachable address).
+        const startPos = bestRoute.indexOf(0);
+        if (startPos > 0) {
+            bestRoute = bestRoute.slice(startPos).concat(bestRoute.slice(0, startPos));
+        }
+
         console.log(bestRoute);
+
+        orderedCities = bestRoute.map(i => ({ lat: cities[i].coords.lat, lng: cities[i].coords.lng, idx: cities[i].originalIndex }));
 
         // Get path for round trip
         let pathPromises = [];
