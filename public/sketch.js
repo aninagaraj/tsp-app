@@ -580,7 +580,7 @@ console.log(paths);
 
 		// Show animate button
 		const animBtn = document.getElementById("animBtn");
-		if (animBtn) animBtn.removeAttribute("hidden");
+		if (animBtn) { animBtn.removeAttribute("hidden"); animBtn.textContent = "Animate route"; }
 
 		// Store route data for animation
 		_lastPaths = paths;
