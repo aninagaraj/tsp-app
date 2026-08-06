@@ -638,7 +638,6 @@ function startRouteAnimation() {
 	if (allCoords.length < 2) return;
 
 	const btn = document.getElementById("animBtn");
-	const origLabel = "Animate route";
 	if (btn) btn.textContent = "Replay";
 
 	if (_animMarker) { _animMarker.removeFrom(tsp); _animMarker = null; }
@@ -660,7 +659,6 @@ function startRouteAnimation() {
 		idx += perFrame;
 		if (idx >= allCoords.length) {
 			idx = 0;
-			if (btn) btn.textContent = origLabel;
 			clearInterval(_animTimer);
 			_animTimer = null;
 		}
