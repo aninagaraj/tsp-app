@@ -638,7 +638,7 @@ function startRouteAnimation() {
 	if (allCoords.length < 2) return;
 
 	const btn = document.getElementById("animBtn");
-	const origLabel = btn ? btn.textContent : "Animate route";
+	const origLabel = "Animate route";
 	if (btn) btn.textContent = "Replay";
 
 	if (_animMarker) { _animMarker.removeFrom(tsp); _animMarker = null; }
