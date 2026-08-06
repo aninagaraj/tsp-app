@@ -412,12 +412,20 @@ async function getAddress() {
 		addresses.push(addr);
 	}
 
-	const all_invalid = (addresses.map(x => (/(enter address \d+)|(^\s*$)/i).test(x)));
+	const filled = addresses.filter(a => !/(enter address \d+)|(^\s*$)/i.test(a)).length;
 
-	if (all_invalid.reduce((acc, val) => acc + val) <= 5) {
-		// Post addresses and model params to API
-		const submitBtn = document.getElementById("submit");
-		submitBtn.disabled = true;
+	if (filled < 3) {
+		document.getElementById("submit").disabled = false;
+		document.getElementById("population").disabled = false;
+		document.getElementById("acc").disabled = false;
+		document.getElementById("mr").disabled = false;
+		document.getElementById("plabel").textContent = "Need ≥3 valid";
+		return;
+	}
+
+	// Post addresses and model params to API
+	const submitBtn = document.getElementById("submit");
+	submitBtn.disabled = true;
 		document.getElementById("population").disabled = true;
 		document.getElementById("acc").disabled = true;
 		document.getElementById("mr").disabled = true;
@@ -614,14 +622,6 @@ console.log(paths);
 			tsp.fitBounds(L.latLngBounds(data.ordered.map(p => [p.lat, p.lng])), { padding: [40, 40] });
 		}
 
-	} else {
-		console.log("Enter at least 3 valid addresses");
-		document.getElementById("submit").disabled = false;
-		document.getElementById("population").disabled = false;
-		document.getElementById("acc").disabled = false;
-		document.getElementById("mr").disabled = false;
-		document.getElementById("plabel").textContent = "Need ≥3 valid";
-	}
 }
 
 
