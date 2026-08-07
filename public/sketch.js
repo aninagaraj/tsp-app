@@ -472,7 +472,7 @@ async function getAddress() {
 
 		if (data.unreachable && data.unreachable.length > 0) {
 			document.getElementById("dist").textContent = "—";
-			document.getElementById("genAt").textContent = "—";
+			document.getElementById("time").textContent = "—";
 			document.getElementById("unreachableNote").textContent = "Cannot find a road route to: " + data.unreachable.join(", ");
 			document.getElementById("unreachableNote").classList.remove("hidden");
 			document.getElementById("resultsSection").classList.remove("hidden");
@@ -596,10 +596,14 @@ console.log(paths);
 			segmentsTbody.appendChild(tr);
 		}
 
-		// Populate results section
-		document.getElementById("objLabel").textContent = currentMetric === "duration" ? "Optimal time" : "Optimal distance";
-		document.getElementById("dist").textContent = currentMetric === "duration" ? formatDuration(sumDur) : formatDist(sumDist, currentUnit);
-		document.getElementById("genAt").textContent = data.bestGen ? "gen " + data.bestGen : "—";
+		// Populate results section — always show total distance + total time,
+		// but only the one matching the selected objective is "optimal".
+		const distText = formatDist(sumDist, currentUnit);
+		const timeText = formatDuration(sumDur);
+		document.getElementById("distLabel").textContent = currentMetric === "duration" ? "Total distance" : "Optimal distance";
+		document.getElementById("timeLabel").textContent = currentMetric === "duration" ? "Optimal time" : "Total time";
+		document.getElementById("dist").textContent = distText;
+		document.getElementById("time").textContent = timeText;
 		document.getElementById("resultsSection").classList.remove("hidden");
 		solvedOnce = true;
 		const ferryNote = document.getElementById("ferryNote");
