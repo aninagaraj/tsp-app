@@ -190,6 +190,7 @@ function setup() {
 		option.text = mrOptions[i];
 		mrSelect.add(option);
 	}
+	mrSelect.selectedIndex = 2; // default 10%
 
 	// Initialize map
 	tsp = L.map('map').setView([0, 0], 2);
