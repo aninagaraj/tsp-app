@@ -32,6 +32,9 @@ function setup() {
 		const label = document.getElementById("plabel");
 		if (bar && label) {
 			bar.style.width = (data.progress * 100).toFixed(1) + "%";
+			const color = progressColor(data.progress);
+			bar.style.background = color;
+			bar.style.boxShadow = "0 0 10px " + color.replace("rgb", "rgba").replace(")", ",0.6)");
 			const div = Math.max(1, data.diversity || 0);
 			label.textContent = Math.round(data.progress * 100) + "% · div " + div;
 		}
@@ -314,6 +317,19 @@ function formatDist(meters, unit) {
 function truncateLabel(s, max = 20) {
 	const str = (s || "").trim();
 	return str.length > max ? str.slice(0, max - 1) + "…" : str;
+}
+
+// Green → amber → red gradient for the progress bar, driven by run progress
+// (t in [0,1]). Mirrors the two-segment lerp used by the p5 tsp visualizer.
+function progressColor(t) {
+	const green = [110, 232, 110];
+	const amber = [255, 174, 66];
+	const red = [216, 27, 96];
+	const lo = t <= 0.5 ? green : amber;
+	const hi = t <= 0.5 ? amber : red;
+	const f = t <= 0.5 ? t * 2 : (t - 0.5) * 2;
+	const c = lo.map((v, i) => Math.round(v + (hi[i] - v) * f));
+	return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
 
 // Highlight (or restore) one route segment's polylines on the map, keyed by
