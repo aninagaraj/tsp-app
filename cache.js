@@ -4,7 +4,7 @@ const path = require('path');
 
 const CACHE_PATH = path.join(__dirname, 'api_cache.json');
 const TTL_MS = 180 * 24 * 60 * 60 * 1000; // 6 months
-const MAX = { geocode: 800, matrix: 400, directions: 2000 };
+const MAX = { geocode: 800, geocode_addr: 800, matrix: 400, directions: 2000 };
 const WRITE_DEBOUNCE_MS = 500;
 
 function normalizeAddress(a) {
@@ -48,6 +48,7 @@ class CacheStore {
 	get(section, key) {
 		const entry = this.data[section][key];
 		if (entry && entry.exp > Date.now()) {
+			entry.la = Date.now(); // LRU: refresh last-access time
 			this.counters[section].hits++;
 			this.data.lifetime[section].hits++;
 			this.scheduleSave();
@@ -59,7 +60,7 @@ class CacheStore {
 	}
 
 	set(section, key, value) {
-		this.data[section][key] = { v: value, ts: Date.now(), exp: Date.now() + TTL_MS };
+		this.data[section][key] = { v: value, ts: Date.now(), la: Date.now(), exp: Date.now() + TTL_MS };
 		this.data.lifetime[section].misses++;
 		this.prune(section);
 		this.scheduleSave();
@@ -79,8 +80,8 @@ class CacheStore {
 		const remaining = Object.keys(store).length;
 		if (remaining > MAX[section]) {
 			const sorted = Object.keys(store)
-				.map(key => ({ key, ts: store[key].ts }))
-				.sort((a, b) => b.ts - a.ts);
+				.map(key => ({ key, la: store[key].la }))
+				.sort((a, b) => b.la - a.la); // LRU: newest last-access first
 			const toDrop = remaining - MAX[section];
 			for (let i = toDrop - 1; i >= 0; i--) {
 				delete store[sorted[sorted.length - 1 - i].key];

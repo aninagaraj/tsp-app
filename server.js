@@ -193,10 +193,13 @@ async function getCoords(address) {
         return invalidObj;
     }
 
-    const key = hash(normalizeAddress(address));
-    const hit = cache.get('geocode', key);
-    if (hit) {
-        return hit;
+    const addrKey = hash(normalizeAddress(address));
+    const cachedPlaceID = cache.get('geocode_addr', addrKey);
+    if (cachedPlaceID) {
+        const hit = cache.get('geocode', hash(cachedPlaceID));
+        if (hit) {
+            return hit;
+        }
     }
 
     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.API_GEOCODE}&address=${address}`;
@@ -218,7 +221,8 @@ async function getCoords(address) {
             placeID: placeID,
             class: "ValidAddress",
         };
-        cache.set('geocode', key, result);
+        cache.set('geocode_addr', addrKey, placeID);
+        cache.set('geocode', hash(placeID), result);
         return result;
     } catch (error) {
         console.error('Geocoding error:', error);
