@@ -1,0 +1,236 @@
+/* ==========================================================================
+   TSP Solver — application styles
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base / layout
+   -------------------------------------------------------------------------- */
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	background: #e8eaed;
+	color: #202124;
+	-webkit-font-smoothing: antialiased;
+}
+
+#map {
+	position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Side panel (addresses + algorithm + results)
+   -------------------------------------------------------------------------- */
+.panel {
+	position: fixed; top: 16px; right: 16px; z-index: 1100;
+	width: 380px; max-height: calc(100vh - 88px);
+	display: flex; flex-direction: column;
+	background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+.panel-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+}
+.panel section { padding: 16px; border-bottom: 1px solid #f1f3f4; }
+.panel section:last-child { border-bottom: none; }
+.panel h2 { font-size: 13px; font-weight: 500; color: #5f6368; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.resize-handle {
+	position: absolute; bottom: 0; left: 0; z-index: 5;
+	width: 18px; height: 18px; cursor: sw-resize;
+	user-select: none; touch-action: none;
+}
+.resize-handle::after {
+	content: ""; position: absolute; left: 4px; bottom: 4px;
+	width: 8px; height: 8px;
+	border-left: 2px solid #9aa0a6;
+	border-bottom: 2px solid #9aa0a6;
+}
+
+/* --------------------------------------------------------------------------
+   Segmented buttons (manual/upload, units, objective, mode toggles)
+   -------------------------------------------------------------------------- */
+.seg { display: flex; gap: 8px; margin-bottom: 14px; }
+.seg button {
+	flex: 1; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+	background: #fff; color: #3c4043; font-size: 13px; font-weight: 500;
+	font-family: inherit; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.seg button:hover { background: #f8f9fa; }
+.seg button.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+
+/* --------------------------------------------------------------------------
+   Upload pane
+   -------------------------------------------------------------------------- */
+.upload-pane { position: relative; }
+.upload-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.upload-label { font-size: 13px; font-weight: 500; color: #3c4043; }
+.info-icon {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 16px; height: 16px; border-radius: 50%;
+	border: 1.5px solid #5f6368; color: #5f6368;
+	font-size: 10px; font-weight: 700; line-height: 1;
+	cursor: pointer; user-select: none;
+}
+.info-icon:hover { border-color: #1a73e8; color: #1a73e8; }
+.popover {
+	display: none;
+	position: absolute; top: 26px; left: 0; z-index: 1300;
+	width: 100%; background: #fff; border: 1px solid #dadce0;
+	border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+	padding: 12px 14px; font-size: 13px; color: #3c4043;
+}
+.popover.open { display: block; }
+.popover .title { font-weight: 500; margin-bottom: 6px; }
+.popover ul { margin: 0; padding-left: 18px; }
+.popover li { margin: 3px 0; }
+.dropzone {
+	border: 2px dashed #dadce0; border-radius: 10px;
+	padding: 24px 14px; text-align: center; cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+}
+.dropzone .icon { font-size: 26px; line-height: 1; }
+.dropzone .main { font-size: 13px; font-weight: 500; color: #3c4043; margin: 8px 0 2px; }
+.dropzone .sub { font-size: 12px; color: #80868b; }
+.dropzone .or { font-size: 12px; color: #80868b; margin: 12px 0 8px; }
+.dropzone .choose {
+	display: inline-block; padding: 7px 14px; background: #fff;
+	border: 1px solid #dadce0; border-radius: 8px; color: #1a73e8;
+	font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+}
+.dropzone .choose:hover { background: #f8f9fa; }
+.dropzone.dragover { border-color: #1a73e8; background: #e8f0fe; }
+.dropzone.dragover .main { color: #1a73e8; }
+.upload-note { font-size: 12px; color: #188038; margin-top: 8px; text-align: center; min-height: 16px; }
+.upload-note.error { color: #c5221f; }
+
+/* --------------------------------------------------------------------------
+   Address grid (2-column manual entry)
+   -------------------------------------------------------------------------- */
+.addr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; }
+.addr-row { display: flex; align-items: center; gap: 6px; }
+.addr-row .num {
+	width: 18px; height: 18px; border-radius: 50%; background: #f1f3f4; color: #5f6368;
+	font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.addr-row input {
+	flex: 1; padding: 6px 8px; border: 1px solid #dadce0; border-radius: 6px;
+	font-size: 12px; font-family: inherit; min-width: 0;
+}
+.addr-row input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+.addr-row input.InvalidAddress { border-color: #ea4335; }
+.addr-row input.ValidAddress { border-color: #34a853; }
+
+/* --------------------------------------------------------------------------
+   Algorithm: GA config, units/objective, constraints
+   -------------------------------------------------------------------------- */
+.ga-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.field label { display: block; font-size: 11px; color: #5f6368; margin-bottom: 3px; }
+.field select {
+	width: 100%; padding: 6px 8px; border: 1px solid #dadce0; border-radius: 6px;
+	font-size: 12px; background: #fff; cursor: pointer;
+}
+.field select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+
+.op-row { display: flex; gap: 8px; margin-top: 10px; }
+.op-group { flex: 1; }
+.op-group label { display: block; font-size: 11px; color: #5f6368; margin-bottom: 3px; }
+.op-group .seg { display: flex; gap: 4px; margin-bottom: 0; }
+.op-group .seg button { padding: 6px 4px; font-size: 12px; white-space: nowrap; }
+
+.avoid-row { display: flex; gap: 8px; margin-top: 10px; }
+.avoid-row .toggle-row {
+	flex: 1; display: flex; align-items: center; justify-content: space-between;
+	padding: 7px 10px; border: 1px solid #dadce0; border-radius: 6px;
+	font-size: 12px; cursor: pointer; margin: 0;
+}
+.avoid-list { display: contents; }
+.toggle-row {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+	font-size: 13px; cursor: pointer;
+}
+.toggle-row .toggle-label { color: #3c4043; }
+.toggle { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+	position: absolute; inset: 0; background: #dadce0; border-radius: 999px;
+	transition: background 0.2s; cursor: pointer;
+}
+.toggle-track::before {
+	content: ""; position: absolute; left: 2px; top: 2px; width: 15px; height: 15px;
+	background: #fff; border-radius: 50%; transition: transform 0.2s;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle input:checked + .toggle-track { background: #1a73e8; }
+.toggle input:checked + .toggle-track::before { transform: translateX(15px); }
+.param-grid select {
+	width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
+	font-size: 13px; background: #fff; cursor: pointer;
+}
+.param-grid select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+.ferry-note { color: #ea4335; font-size: 12px; margin-top: 10px; }
+.toggle-caveat { margin: 0; padding: 0 10px; font-size: 11px; color: #80868b; line-height: 1.4; }
+
+/* --------------------------------------------------------------------------
+   Map markers
+   -------------------------------------------------------------------------- */
+.ferry-icon { display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.num-circle { display: flex; align-items: center; justify-content: center; background: #fff; color: #202124; border: 2px solid #1a73e8; border-radius: 50%; font-size: 12px; font-weight: 700; font-family: inherit; }
+.num-circle.start { border-color: #e8710a; color: #e8710a; box-shadow: 0 0 0 3px rgba(232,113,10,0.3); }
+.num-circle.unreachable { border-color: #ea4335; color: #ea4335; background: #fce8e6; box-shadow: 0 0 0 3px rgba(234,67,53,0.3); }
+
+/* --------------------------------------------------------------------------
+   Actions: solve / reset buttons + progress bar
+   -------------------------------------------------------------------------- */
+.controls { display: flex; gap: 8px; margin-top: 14px; }
+.btn { flex: 1; border: none; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.btn-primary { background: #1a73e8; color: #fff; }
+.btn-primary:hover { background: #1765cc; }
+.btn-primary:disabled { background: #a8c7f5; cursor: not-allowed; }
+.btn-ghost { background: #fff; color: #3c4043; border: 1px solid #dadce0; }
+.btn-ghost:hover { background: #f8f9fa; }
+
+.progress-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.progress-wrap { flex: 1; height: 8px; background: #f1f3f4; border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; width: 0%; background: #1a73e8; border-radius: 999px; transition: width 0.15s linear; }
+.progress-label { font-size: 12px; color: #5f6368; min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   Results: summary stats + segment table
+   -------------------------------------------------------------------------- */
+.summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.stat {
+	background: #f8f9fa; border: 1px solid #e0e3e6; border-radius: 8px;
+	padding: 8px 10px;
+}
+.stat .k { font-size: 11px; color: #5f6368; }
+.stat .v { font-size: 15px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+.segments-wrap { overflow: hidden; border-radius: 8px; border: 1px solid #e0e3e6; }
+.segments-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.segments-table thead th {
+	text-align: right; color: #5f6368; font-weight: 500; font-size: 11px;
+	text-transform: uppercase; letter-spacing: 0.03em;
+	padding: 4px 8px; border-bottom: 1px solid #dadce0; background: #fff;
+}
+.segments-table thead th:first-child { text-align: left; }
+.segments-table thead th:nth-child(2) { text-align: left; }
+.segments-table tbody td { padding: 6px 8px; border-bottom: 1px solid #f1f3f4; font-variant-numeric: tabular-nums; }
+.segments-table tbody tr:nth-child(even) { background: #f8f9fa; }
+.segments-table tbody tr:hover { background: #e8f0fe; cursor: pointer; }
+.segments-table tbody tr.ferry-leg { background: #fff8e6; }
+.segments-table td.num { color: #80868b; width: 22px; }
+.segments-table td.leg { text-align: left; min-width: 0; }
+.segments-table td.leg .arrow { color: #9aa0a6; margin: 0 4px; }
+.segments-table td.leg .from { color: #202124; }
+.segments-table td.dist, .segments-table td.time { text-align: right; white-space: nowrap; }
+.ferry-tag { margin-left: 6px; }
+
+/* --------------------------------------------------------------------------
+   Utilities
+   -------------------------------------------------------------------------- */
+.hidden { display: none; }
+.route-glow { pointer-events: none; }
