@@ -525,7 +525,9 @@ async function getAddress() {
 			curr_layer = L.layerGroup(numMarkers);
 			curr_layer.addTo(tsp);
 			if (allCoords.length > 0) {
-				tsp.fitBounds(L.latLngBounds(allCoords.map(p => [p.lat, p.lng])), { padding: [40, 40] });
+				// Reserve ~420px on the right for the side panel so eastern
+				// points (e.g. an unreachable island destination) stay visible.
+				tsp.fitBounds(L.latLngBounds(allCoords.map(p => [p.lat, p.lng])), { paddingTopLeft: [40, 40], paddingBottomRight: [420, 40] });
 			}
 			return;
 		}
