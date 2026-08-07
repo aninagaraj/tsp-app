@@ -27,6 +27,7 @@ const SCENARIOS = [
     waitForResults: false,
     expectUnreachable: true,
     zoomOut: true,
+    fitAllMarkers: true,
   },
   {
     name: 'ferries',
@@ -65,14 +66,30 @@ async function waitForResults(page) {
 }
 
 // Zoom the Leaflet map out so all route points are clearly in view, and nudge
-// it away from the right-hand panel. `tsp` is a global on the page.
-async function zoomOutForCapture(page) {
-  await page.evaluate(() => {
+// it away from the right-hand panel. `tsp` and `curr_layer` are globals on the
+// page. For unreachable scenarios, fit over EVERY marker (reachable + not) so
+// the off-route destination is visible too.
+async function zoomOutForCapture(page, fitAll = false) {
+  await page.evaluate((fitAll) => {
     if (typeof tsp === 'undefined') return;
+    if (fitAll && typeof curr_layer !== 'undefined' && curr_layer) {
+      const pts = [];
+      curr_layer.eachLayer(l => {
+        const ll = l.getLatLng && l.getLatLng();
+        if (ll) pts.push([ll.lat, ll.lng]);
+      });
+      if (pts.length) {
+        tsp.fitBounds(L.latLngBounds(pts), { padding: [40, 40] });
+        tsp.setZoom(tsp.getZoom() - 1, { animate: false });
+        const c = tsp.getCenter();
+        tsp.setView([c.lat, c.lng - 0.04], tsp.getZoom(), { animate: false });
+        return;
+      }
+    }
     const c = tsp.getCenter();
     // nudge center left so the 380px panel doesn't hide the right edge
     tsp.setView([c.lat, c.lng - 0.04], Math.max(tsp.getZoom() - 1, 3), { animate: false });
-  });
+  }, fitAll);
 }
 
 async function captureScenario(page, scenario) {
@@ -94,7 +111,7 @@ async function captureScenario(page, scenario) {
 
   if (scenario.expectUnreachable) {
     await page.waitForSelector('#unreachableNote:not(.hidden)', { timeout: 120000 });
-    if (scenario.zoomOut) await zoomOutForCapture(page);
+    if (scenario.zoomOut) await zoomOutForCapture(page, scenario.fitAllMarkers);
     await page.waitForTimeout(2000);
     await page.screenshot({ path: png, fullPage: false });
   } else if (scenario.name === 'interim-live') {
