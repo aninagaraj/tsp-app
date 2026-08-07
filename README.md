@@ -140,7 +140,7 @@ Even though the algorithm itself is not the focus of this project, the genetic a
 
 ## Demo Gallery
 
-> _Screenshots were captured with the earlier build that capped input at 8 addresses. The current version accepts up to 10._
+> _Captured with the current build (up to 10 addresses), using Playwright against live solves._
 
 | Run | Description | Screenshot |
 |-----|--------------|-------------|
