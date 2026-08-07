@@ -521,11 +521,11 @@ async function getAddress() {
 				curr_layer.removeFrom(tsp);
 			}
 			const numMarkers = buildCityMarkers(data.coords, data.unreachableCoords, false);
-			const valid = data.coords.filter(Boolean);
+			const allCoords = data.coords.filter(Boolean);
 			curr_layer = L.layerGroup(numMarkers);
 			curr_layer.addTo(tsp);
-			if (valid.length > 0) {
-				tsp.fitBounds(L.latLngBounds(valid.map(p => [p.lat, p.lng])), { padding: [40, 40] });
+			if (allCoords.length > 0) {
+				tsp.fitBounds(L.latLngBounds(allCoords.map(p => [p.lat, p.lng])), { padding: [40, 40] });
 			}
 			return;
 		}
