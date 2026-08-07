@@ -117,6 +117,25 @@
 
 		.param-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
 		.param-grid label { display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px; }
+
+		.algo-cards { display: grid; gap: 12px; }
+		.algo-card {
+			background: #fff;
+			border: 1px solid #e0e3e6;
+			border-radius: 10px;
+			padding: 12px 14px;
+		}
+		.algo-card h3 {
+			margin: 0 0 10px;
+			font-size: 12px;
+			font-weight: 500;
+			color: #5f6368;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+		.algo-card .controls { margin-top: 0; }
+		.algo-card .seg { margin-bottom: 0; }
+		.algo-card .progress-row { margin-top: 12px; }
 		.avoid-list { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
 		.toggle-row {
 			display: flex; align-items: center; justify-content: space-between;
@@ -222,55 +241,75 @@
 
 		<section id="algoSection">
 			<h2>Algorithm</h2>
-			<div class="param-grid">
-				<div>
-					<label for="population">Population size</label>
-					<select id="population"></select>
+			<div class="algo-cards">
+				<div class="algo-card">
+					<h3>GA config</h3>
+					<div class="param-grid">
+						<div>
+							<label for="population">Population size</label>
+							<select id="population"></select>
+						</div>
+						<div>
+							<label for="acc">Accuracy (generations)</label>
+							<select id="acc"></select>
+						</div>
+						<div>
+							<label for="mr">Mutation rate</label>
+							<select id="mr"></select>
+						</div>
+					</div>
 				</div>
-				<div>
-					<label for="acc">Accuracy (generations)</label>
-					<select id="acc"></select>
+
+				<div class="algo-card">
+					<h3>Units</h3>
+					<div class="seg" id="unitsSeg">
+						<button id="unitMi" class="active" onclick="setUnits('mi')">Miles</button>
+						<button id="unitKm" onclick="setUnits('km')">Kilometers</button>
+					</div>
 				</div>
-				<div>
-					<label for="mr">Mutation rate</label>
-					<select id="mr"></select>
+
+				<div class="algo-card">
+					<h3>Objective function</h3>
+					<div class="seg" id="objSeg">
+						<button id="objDistance" class="active" onclick="setObjective('distance')">By distance</button>
+						<button id="objDuration" onclick="setObjective('duration')">By time</button>
+					</div>
+					<p class="toggle-caveat">"By time" optimizes the round trip for shortest driving time.</p>
+				</div>
+
+				<div class="algo-card">
+					<h3>Constraints</h3>
+					<div class="avoid-list">
+						<label class="toggle-row">
+							<span class="toggle-label">Avoid toll roads?</span>
+							<span class="toggle">
+								<input type="checkbox" id="avoid-tolls" />
+								<span class="toggle-track"></span>
+							</span>
+						</label>
+						<label class="toggle-row">
+							<span class="toggle-label">Avoid ferries?</span>
+							<span class="toggle">
+								<input type="checkbox" id="avoid-ferries" />
+								<span class="toggle-track"></span>
+							</span>
+						</label>
+					</div>
+					<p class="toggle-caveat">Google treats "avoid" as a preference, not a hard ban — a ferry may still be used if it's the best or only connection.</p>
+				</div>
+
+				<div class="algo-card">
+					<div class="controls">
+						<button class="btn btn-primary" id="submit" onclick="getAddress()">Solve route</button>
+						<button class="btn btn-ghost" id="reset" onclick="resetAll()">Reset</button>
+					</div>
+					<div class="progress-row">
+						<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
+						<div class="progress-label" id="plabel">Idle</div>
+					</div>
+					<div class="progress-label" id="liveDist" hidden>Best so far: —</div>
 				</div>
 			</div>
-			<div class="seg" id="unitsSeg">
-				<button id="unitMi" class="active" onclick="setUnits('mi')">Miles</button>
-				<button id="unitKm" onclick="setUnits('km')">Kilometers</button>
-			</div>
-			<div class="seg" id="objSeg">
-				<button id="objDistance" class="active" onclick="setObjective('distance')">By distance</button>
-				<button id="objDuration" onclick="setObjective('duration')">By time</button>
-			</div>
-			<p class="toggle-caveat">"By time" optimizes the round trip for shortest driving time.</p>
-			<div class="avoid-list">
-				<label class="toggle-row">
-					<span class="toggle-label">Avoid toll roads?</span>
-					<span class="toggle">
-						<input type="checkbox" id="avoid-tolls" />
-						<span class="toggle-track"></span>
-					</span>
-				</label>
-				<label class="toggle-row">
-					<span class="toggle-label">Avoid ferries?</span>
-					<span class="toggle">
-						<input type="checkbox" id="avoid-ferries" />
-						<span class="toggle-track"></span>
-					</span>
-				</label>
-				<p class="toggle-caveat">Note: Google treats "avoid" as a preference, not a hard ban — a ferry may still be used if it's the best or only connection.</p>
-			</div>
-			<div class="controls">
-				<button class="btn btn-primary" id="submit" onclick="getAddress()">Solve route</button>
-				<button class="btn btn-ghost" id="reset" onclick="resetAll()">Reset</button>
-			</div>
-			<div class="progress-row">
-				<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
-				<div class="progress-label" id="plabel">Idle</div>
-			</div>
-			<div class="progress-label" id="liveDist" hidden>Best so far: —</div>
 		</section>
 
 		<section id="resultsSection" class="hidden">
