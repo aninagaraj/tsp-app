@@ -159,8 +159,6 @@
 			font-size: 13px; background: #fff; cursor: pointer;
 		}
 		.param-grid select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
-		.ferry-leg .dist { color: #ea4335; }
-		.ferry-badge { color: #ea4335; font-size: 11px; font-weight: 600; }
 		.ferry-note { color: #ea4335; font-size: 12px; margin-top: 10px; }
 		.toggle-caveat { margin: 0; padding: 0 10px; font-size: 11px; color: #80868b; line-height: 1.4; }
 		.ferry-icon { display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -181,16 +179,32 @@
 		.progress-bar { height: 100%; width: 0%; background: #1a73e8; border-radius: 999px; transition: width 0.15s linear; }
 		.progress-label { font-size: 12px; color: #5f6368; min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
 
-		.stat { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 13px; }
-		.stat:last-child { border-bottom: none; }
-		.stat .k { color: #5f6368; }
-		.stat .v { font-weight: 500; font-variant-numeric: tabular-nums; }
+		.summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+		.stat {
+			background: #f8f9fa; border: 1px solid #e0e3e6; border-radius: 8px;
+			padding: 8px 10px;
+		}
+		.stat .k { font-size: 11px; color: #5f6368; }
+		.stat .v { font-size: 15px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
 
-		.route-list { list-style: none; margin: 8px 0 0; padding: 0; }
-		.route-list li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
-		.route-list li:nth-child(odd) { background: #f8f9fa; }
-		.route-list .step { color: #80868b; }
-		.route-list .dist { color: #5f6368; font-variant-numeric: tabular-nums; }
+		.segments-wrap { overflow: hidden; border-radius: 8px; border: 1px solid #e0e3e6; }
+		.segments-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+		.segments-table thead th {
+			text-align: right; color: #5f6368; font-weight: 500; font-size: 11px;
+			text-transform: uppercase; letter-spacing: 0.03em;
+			padding: 4px 8px; border-bottom: 1px solid #dadce0; background: #fff;
+		}
+		.segments-table thead th:first-child { text-align: left; }
+		.segments-table thead th:nth-child(2) { text-align: left; }
+		.segments-table tbody td { padding: 6px 8px; border-bottom: 1px solid #f1f3f4; font-variant-numeric: tabular-nums; }
+		.segments-table tbody tr:nth-child(even) { background: #f8f9fa; }
+		.segments-table tbody tr.ferry-leg { background: #fff8e6; }
+		.segments-table td.num { color: #80868b; width: 22px; }
+		.segments-table td.leg { text-align: left; min-width: 0; }
+		.segments-table td.leg .arrow { color: #9aa0a6; margin: 0 4px; }
+		.segments-table td.leg .from { color: #202124; }
+		.segments-table td.dist, .segments-table td.time { text-align: right; white-space: nowrap; }
+		.ferry-tag { margin-left: 6px; }
 
 		.hidden { display: none; }
 		.route-glow { pointer-events: none; }
@@ -302,9 +316,29 @@
 
 		<section id="resultsSection" class="hidden">
 			<h2>Results</h2>
-			<div class="stat"><div class="k" id="objLabel">Optimal distance</div><div class="v" id="dist">—</div></div>
-			<div class="stat"><div class="k">Last improved at</div><div class="v" id="genAt">—</div></div>
-			<ol class="route-list" id="segments"></ol>
+			<div class="summary-row">
+				<div class="stat">
+					<div class="k" id="objLabel">Optimal distance</div>
+					<div class="v" id="dist">—</div>
+				</div>
+				<div class="stat">
+					<div class="k">Last improved at</div>
+					<div class="v" id="genAt">—</div>
+				</div>
+			</div>
+			<div class="segments-wrap">
+				<table class="segments-table">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>From → To</th>
+							<th>Dist</th>
+							<th>Time</th>
+						</tr>
+					</thead>
+					<tbody id="segments"></tbody>
+				</table>
+			</div>
 			<div class="ferry-note hidden" id="ferryNote"></div>
 			<div class="ferry-note hidden" id="unreachableNote"></div>
 			<div class="controls">

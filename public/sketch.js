@@ -311,6 +311,11 @@ function formatDist(meters, unit) {
 	return value.toLocaleString(undefined, { maximumFractionDigits: 1 }) + (unit === "km" ? " km" : " mi");
 }
 
+function truncateLabel(s, max = 20) {
+	const str = (s || "").trim();
+	return str.length > max ? str.slice(0, max - 1) + "…" : str;
+}
+
 function clearInterim() {
 	if (interim) {
 		interim.removeFrom(tsp);
@@ -532,30 +537,63 @@ console.log(paths);
 		let sumDist = 0;
 		let sumDur = 0;
 		let ferryLegs = 0;
+		const segmentsTbody = document.getElementById("segments");
+		segmentsTbody.innerHTML = "";
 		for (let i = 0; i < paths.length; i++) {
 			const p1 = paths[i % paths.length];
-			const p2 = paths[(i + 1) % paths.length];
 			sumDist += p1.seg_dist_m;
 			sumDur += p1.seg_dur_s;
-			const li = document.createElement("li");
-			const step = document.createElement("span");
-			step.className = "step";
-			step.textContent = `Segment ${i + 1}`;
+
+			const tr = document.createElement("tr");
 			if (p1.ferry) {
-				const ferry = document.createElement("span");
-				ferry.className = "ferry-badge";
-				ferry.textContent = " (ferry)";
-				ferry.title = ferriesDisallowed ? "Still includes a ferry despite Avoid ferries being on" : "Route includes a ferry";
-				step.append(ferry);
-				li.classList.add("ferry-leg");
+				tr.classList.add("ferry-leg");
 				ferryLegs++;
 			}
-			step.append(`: ${p1.origin} → ${p2.origin}`);
-			const dist = document.createElement("span");
-			dist.className = "dist";
-			dist.textContent = formatDist(p1.seg_dist_m, currentUnit) + " · " + formatDuration(p1.seg_dur_s);
-			li.append(step, dist);
-			document.getElementById("segments").appendChild(li);
+
+			// # column
+			const numTd = document.createElement("td");
+			numTd.className = "num";
+			numTd.textContent = i + 1;
+
+			// From → To — short user-entered labels, full address on hover
+			const stopA = data.ordered[i];
+			const stopB = data.ordered[(i + 1) % data.ordered.length];
+			const fromText = stopA && textboxes[stopA.idx] ? textboxes[stopA.idx].value : (p1.origin || "");
+			const toText = stopB && textboxes[stopB.idx] ? textboxes[stopB.idx].value : (p1.destination || "");
+			const legTd = document.createElement("td");
+			legTd.className = "leg";
+			const fromSpan = document.createElement("span");
+			fromSpan.className = "from";
+			fromSpan.textContent = truncateLabel(fromText);
+			fromSpan.title = fromText;
+			const arrowSpan = document.createElement("span");
+			arrowSpan.className = "arrow";
+			arrowSpan.textContent = "→";
+			const toSpan = document.createElement("span");
+			toSpan.className = "from";
+			toSpan.textContent = truncateLabel(toText);
+			toSpan.title = toText;
+			legTd.append(fromSpan, arrowSpan, toSpan);
+
+			// Dist column
+			const distTd = document.createElement("td");
+			distTd.className = "dist";
+			distTd.textContent = formatDist(p1.seg_dist_m, currentUnit);
+
+			// Time column + ferry icon
+			const timeTd = document.createElement("td");
+			timeTd.className = "time";
+			timeTd.textContent = formatDuration(p1.seg_dur_s);
+			if (p1.ferry) {
+				const ferryIcon = document.createElement("span");
+				ferryIcon.className = "ferry-tag";
+				ferryIcon.textContent = "⛴";
+				ferryIcon.title = ferriesDisallowed ? "Still includes a ferry despite Avoid ferries being on" : "Route includes a ferry";
+				timeTd.appendChild(ferryIcon);
+			}
+
+			tr.append(numTd, legTd, distTd, timeTd);
+			segmentsTbody.appendChild(tr);
 		}
 
 		// Populate results section
