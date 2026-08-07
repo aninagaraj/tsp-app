@@ -316,6 +316,22 @@ function truncateLabel(s, max = 20) {
 	return str.length > max ? str.slice(0, max - 1) + "…" : str;
 }
 
+// Highlight (or restore) one route segment's polylines on the map, keyed by
+// the segment's index in the paths array.
+function highlightSegment(i, on) {
+	const seg = _segmentPolylines[i];
+	if (!seg) return;
+	if (on) {
+		seg.main.setStyle({ weight: 5, opacity: 1 });
+		seg.glow.setStyle({ weight: 10, opacity: 0.3 });
+		seg.main.bringToFront();
+		seg.glow.bringToFront();
+	} else {
+		seg.main.setStyle({ weight: 2, opacity: 0.6 });
+		seg.glow.setStyle({ weight: 6, opacity: 0.12 });
+	}
+}
+
 function clearInterim() {
 	if (interim) {
 		interim.removeFrom(tsp);
@@ -539,6 +555,7 @@ console.log(paths);
 		let ferryLegs = 0;
 		const segmentsTbody = document.getElementById("segments");
 		segmentsTbody.innerHTML = "";
+		_segmentPolylines = [];
 		for (let i = 0; i < paths.length; i++) {
 			const p1 = paths[i % paths.length];
 			sumDist += p1.seg_dist_m;
@@ -593,6 +610,8 @@ console.log(paths);
 			}
 
 			tr.append(numTd, legTd, distTd, timeTd);
+			tr.addEventListener("mouseenter", () => highlightSegment(i, true));
+			tr.addEventListener("mouseleave", () => highlightSegment(i, false));
 			segmentsTbody.appendChild(tr);
 		}
 
@@ -638,12 +657,14 @@ console.log(paths);
 		for (let i = 0; i < paths.length; i++) {
 			const col = paths[i].ferry ? '#FF6F00' : '#283593';
 			// glow layer — wide, faint, behind the main line
-			polylines.push(L.polyline(paths[i].coords, {
+			const glow = L.polyline(paths[i].coords, {
 				color: col, weight: 6, opacity: 0.12, className: 'route-glow',
-			}));
-			polylines.push(L.polyline(paths[i].coords, {
+			});
+			const main = L.polyline(paths[i].coords, {
 				color: col, opacity: 0.6, weight: 2, dashArray: '8, 8',
-			}));
+			});
+			polylines.push(glow, main);
+			_segmentPolylines[i] = { glow, main };
 			if (paths[i].ferry) {
 				const start = paths[i].ferryStart;
 				ferryMarkers.push(L.marker([start.lat, start.lng], {
@@ -672,6 +693,7 @@ console.log(paths);
 let _lastPaths = null;
 let _animMarker = null;
 let _animTimer = null;
+let _segmentPolylines = [];
 
 function startRouteAnimation() {
 	if (!_lastPaths || _lastPaths.length === 0) return;
@@ -722,6 +744,7 @@ function stopRouteAnimation() {
 	window.resetAll = function () {
 		stopRouteAnimation();
 		_lastPaths = null;
+		_segmentPolylines = [];
 		const animBtn = document.getElementById("animBtn");
 		if (animBtn) animBtn.setAttribute("hidden", "");
 		document.getElementById("liveDist").setAttribute("hidden", "");
