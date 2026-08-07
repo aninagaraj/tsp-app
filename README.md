@@ -1,4 +1,6 @@
-# Traveling Salesman Problem (TSP) App
+# Routewise
+
+A traveling-salesman-style route optimizer for up to **10 addresses**.
 
 This project implements a **TSP Solver and Visualizer** using **Node.js**, a **Genetic Algorithm**, and the **Google Maps APIs**. It allows users to input multiple addresses, computes an optimized visiting order using a Genetic Algorithm, and visualizes the route and total distance directly on an interactive map (Leaflet/OpenStreetMap).
 
@@ -10,7 +12,7 @@ I found myself needing a small lightweight app that would determine the optimal 
 
 *Main interface showing address inputs, controls, and the map output.*
 
-![TSP Solver UI Overview](./screenshots/overview.jpg)
+![Routewise UI Overview](./screenshots/overview.jpg)
 
 ---
 
@@ -45,7 +47,7 @@ Express server (server.js)
 ## File Overview
 
 ```
-tsp-app/
+routewise/
 ├── server.js          # Express + Socket.IO server: routes, GA solver, cache wiring
 ├── cache.js           # disk-persisted LRU cache for geocode / matrix / directions calls
 ├── package.json

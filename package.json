@@ -1,7 +1,7 @@
 {
-  "name": "tsp-app",
+  "name": "routewise",
   "version": "1.0.0",
-  "description": "TSP for up to 10 addresses — public mirror of the tsp_solver project",
+  "description": "Multi-stop route optimizer for up to 10 addresses — a traveling-salesman-style solver",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
