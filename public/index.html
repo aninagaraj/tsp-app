@@ -101,61 +101,60 @@
 		.upload-note { font-size: 12px; color: #188038; margin-top: 8px; text-align: center; min-height: 16px; }
 		.upload-note.error { color: #c5221f; }
 
-		.addr-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-		.addr-row { display: flex; align-items: center; gap: 8px; }
+		.addr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; }
+		.addr-row { display: flex; align-items: center; gap: 6px; }
 		.addr-row .num {
-			width: 20px; height: 20px; border-radius: 50%; background: #f1f3f4; color: #5f6368;
-			font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+			width: 18px; height: 18px; border-radius: 50%; background: #f1f3f4; color: #5f6368;
+			font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 		}
 		.addr-row input {
-			flex: 1; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
-			font-size: 13px; font-family: inherit; min-width: 0;
+			flex: 1; padding: 6px 8px; border: 1px solid #dadce0; border-radius: 6px;
+			font-size: 12px; font-family: inherit; min-width: 0;
 		}
 		.addr-row input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
 		.addr-row input.InvalidAddress { border-color: #ea4335; }
 		.addr-row input.ValidAddress { border-color: #34a853; }
 
-		.param-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-		.param-grid label { display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px; }
+		.ga-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+		.field label { display: block; font-size: 11px; color: #5f6368; margin-bottom: 3px; }
+		.field select {
+			width: 100%; padding: 6px 8px; border: 1px solid #dadce0; border-radius: 6px;
+			font-size: 12px; background: #fff; cursor: pointer;
+		}
+		.field select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
 
-		.algo-cards { display: grid; gap: 12px; }
-		.algo-card {
-			background: #fff;
-			border: 1px solid #e0e3e6;
-			border-radius: 10px;
-			padding: 12px 14px;
+		.op-row { display: flex; gap: 8px; margin-top: 10px; }
+		.op-group { flex: 1; }
+		.op-group label { display: block; font-size: 11px; color: #5f6368; margin-bottom: 3px; }
+		.op-group .seg { display: flex; gap: 4px; margin-bottom: 0; }
+		.op-group .seg button { padding: 6px 4px; font-size: 12px; white-space: nowrap; }
+
+		.avoid-row { display: flex; gap: 8px; margin-top: 10px; }
+		.avoid-row .toggle-row {
+			flex: 1; display: flex; align-items: center; justify-content: space-between;
+			padding: 7px 10px; border: 1px solid #dadce0; border-radius: 6px;
+			font-size: 12px; cursor: pointer; margin: 0;
 		}
-		.algo-card h3 {
-			margin: 0 0 10px;
-			font-size: 12px;
-			font-weight: 500;
-			color: #5f6368;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
-		}
-		.algo-card .controls { margin-top: 0; }
-		.algo-card .seg { margin-bottom: 0; }
-		.algo-card .progress-row { margin-top: 12px; }
-		.avoid-list { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+		.avoid-list { display: contents; }
 		.toggle-row {
 			display: flex; align-items: center; justify-content: space-between;
 			padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
 			font-size: 13px; cursor: pointer;
 		}
 		.toggle-row .toggle-label { color: #3c4043; }
-		.toggle { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+		.toggle { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
 		.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
 		.toggle-track {
 			position: absolute; inset: 0; background: #dadce0; border-radius: 999px;
 			transition: background 0.2s; cursor: pointer;
 		}
 		.toggle-track::before {
-			content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px;
+			content: ""; position: absolute; left: 2px; top: 2px; width: 15px; height: 15px;
 			background: #fff; border-radius: 50%; transition: transform 0.2s;
 			box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 		}
 		.toggle input:checked + .toggle-track { background: #1a73e8; }
-		.toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+		.toggle input:checked + .toggle-track::before { transform: translateX(15px); }
 		.param-grid select {
 			width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 8px;
 			font-size: 13px; background: #fff; cursor: pointer;
@@ -241,75 +240,65 @@
 
 		<section id="algoSection">
 			<h2>Algorithm</h2>
-			<div class="algo-cards">
-				<div class="algo-card">
-					<h3>GA config</h3>
-					<div class="param-grid">
-						<div>
-							<label for="population">Population size</label>
-							<select id="population"></select>
-						</div>
-						<div>
-							<label for="acc">Accuracy (generations)</label>
-							<select id="acc"></select>
-						</div>
-						<div>
-							<label for="mr">Mutation rate</label>
-							<select id="mr"></select>
-						</div>
-					</div>
-				</div>
 
-				<div class="algo-card">
-					<h3>Units</h3>
-					<div class="seg" id="unitsSeg">
-						<button id="unitMi" class="active" onclick="setUnits('mi')">Miles</button>
-						<button id="unitKm" onclick="setUnits('km')">Kilometers</button>
-					</div>
+			<div class="ga-row">
+				<div class="field">
+					<label for="population">Population</label>
+					<select id="population"></select>
 				</div>
-
-				<div class="algo-card">
-					<h3>Objective function</h3>
-					<div class="seg" id="objSeg">
-						<button id="objDistance" class="active" onclick="setObjective('distance')">By distance</button>
-						<button id="objDuration" onclick="setObjective('duration')">By time</button>
-					</div>
-					<p class="toggle-caveat">"By time" optimizes the round trip for shortest driving time.</p>
+				<div class="field">
+					<label for="acc">Generations</label>
+					<select id="acc"></select>
 				</div>
-
-				<div class="algo-card">
-					<h3>Constraints</h3>
-					<div class="avoid-list">
-						<label class="toggle-row">
-							<span class="toggle-label">Avoid toll roads?</span>
-							<span class="toggle">
-								<input type="checkbox" id="avoid-tolls" />
-								<span class="toggle-track"></span>
-							</span>
-						</label>
-						<label class="toggle-row">
-							<span class="toggle-label">Avoid ferries?</span>
-							<span class="toggle">
-								<input type="checkbox" id="avoid-ferries" />
-								<span class="toggle-track"></span>
-							</span>
-						</label>
-					</div>
-					<p class="toggle-caveat">Google treats "avoid" as a preference, not a hard ban — a ferry may still be used if it's the best or only connection.</p>
-				</div>
-
-				<div class="algo-card">
-					<div class="controls">
-						<button class="btn btn-primary" id="submit" onclick="getAddress()">Solve route</button>
-						<button class="btn btn-ghost" id="reset" onclick="resetAll()">Reset</button>
-					</div>
-					<div class="progress-row">
-						<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
-						<div class="progress-label" id="plabel">Idle</div>
-					</div>
-					<div class="progress-label" id="liveDist" hidden>Best so far: —</div>
+				<div class="field">
+					<label for="mr">Mutation</label>
+					<select id="mr"></select>
 				</div>
 			</div>
+
+			<div class="op-row">
+				<div class="op-group">
+					<label>Units</label>
+					<div class="seg" id="unitsSeg">
+						<button id="unitMi" class="active" onclick="setUnits('mi')">mi</button>
+						<button id="unitKm" onclick="setUnits('km')">km</button>
+					</div>
+				</div>
+				<div class="op-group">
+					<label>Objective</label>
+					<div class="seg" id="objSeg">
+						<button id="objDistance" class="active" onclick="setObjective('distance')">dist</button>
+						<button id="objDuration" onclick="setObjective('duration')">time</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="avoid-row">
+				<label class="toggle-row">
+					<span class="toggle-label">Avoid tolls</span>
+					<span class="toggle">
+						<input type="checkbox" id="avoid-tolls" />
+						<span class="toggle-track"></span>
+					</span>
+				</label>
+				<label class="toggle-row">
+					<span class="toggle-label">Avoid ferries</span>
+					<span class="toggle">
+						<input type="checkbox" id="avoid-ferries" />
+						<span class="toggle-track"></span>
+					</span>
+				</label>
+			</div>
+
+			<div class="controls">
+				<button class="btn btn-primary" id="submit" onclick="getAddress()">Solve route</button>
+				<button class="btn btn-ghost" id="reset" onclick="resetAll()">Reset</button>
+			</div>
+			<div class="progress-row">
+				<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
+				<div class="progress-label" id="plabel">Idle</div>
+			</div>
+			<div class="progress-label" id="liveDist" hidden>Best so far: —</div>
 		</section>
 
 		<section id="resultsSection" class="hidden">
