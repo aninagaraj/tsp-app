@@ -26,12 +26,14 @@ const SCENARIOS = [
     addresses: ['Ilkal, Karnataka, India', 'Chengala, Kerala, India', 'North Sentinel Island, Andaman and Nicobar Islands, India'],
     waitForResults: false,
     expectUnreachable: true,
+    zoomOut: true,
   },
   {
     name: 'ferries',
     // Messina Strait crossing (Sicily ↔ mainland) is a classic driveable ferry leg.
     addresses: ['Villa San Giovanni, Italy', 'Messina, Sicily, Italy', 'Palermo, Sicily, Italy', 'Reggio Calabria, Italy'],
     waitForResults: true,
+    zoomOut: true,
   },
   {
     name: 'overview',
@@ -62,6 +64,17 @@ async function waitForResults(page) {
   await page.waitForSelector('#segments tr', { timeout: 30000 });
 }
 
+// Zoom the Leaflet map out so all route points are clearly in view, and nudge
+// it away from the right-hand panel. `tsp` is a global on the page.
+async function zoomOutForCapture(page) {
+  await page.evaluate(() => {
+    if (typeof tsp === 'undefined') return;
+    const c = tsp.getCenter();
+    // nudge center left so the 380px panel doesn't hide the right edge
+    tsp.setView([c.lat, c.lng - 0.04], Math.max(tsp.getZoom() - 1, 3), { animate: false });
+  });
+}
+
 async function captureScenario(page, scenario) {
   await page.goto(BASE, { waitUntil: 'networkidle' });
   await page.click('#reset');
@@ -81,6 +94,7 @@ async function captureScenario(page, scenario) {
 
   if (scenario.expectUnreachable) {
     await page.waitForSelector('#unreachableNote:not(.hidden)', { timeout: 120000 });
+    if (scenario.zoomOut) await zoomOutForCapture(page);
     await page.waitForTimeout(2000);
     await page.screenshot({ path: png, fullPage: false });
   } else if (scenario.name === 'interim-live') {
@@ -92,6 +106,8 @@ async function captureScenario(page, scenario) {
     await waitForResults(page);
     // let the map + table settle
     await page.waitForTimeout(2000);
+    if (scenario.zoomOut) await zoomOutForCapture(page);
+    await page.waitForTimeout(1500);
     await page.screenshot({ path: png, fullPage: false });
   }
   toJpg(png, jpg);
@@ -101,7 +117,9 @@ async function captureScenario(page, scenario) {
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1400, height: 950 } });
+  const only = process.argv.slice(2); // optional: scenario names to run
   for (const s of SCENARIOS) {
+    if (only.length && !only.includes(s.name)) continue;
     try {
       await captureScenario(page, s);
     } catch (e) {
